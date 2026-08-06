@@ -3,351 +3,187 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Store Daily Sales Report</title>
+<title>Greyhound Cafe — Daily Sales Report</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');
 
-  :root {
-    --bg:       #0d1117;
-    --surface:  #161b22;
-    --card:     #1c2230;
-    --border:   rgba(255,255,255,0.08);
-    --border2:  rgba(255,255,255,0.14);
-    --text:     #e6edf3;
-    --muted:    #8b949e;
-    --accent:   #3b82f6;
-    --accent2:  #60a5fa;
-    --green:    #3fb950;
-    --red:      #f85149;
-    --amber:    #d29922;
-    --mono:     'JetBrains Mono', monospace;
-    --sans:     'Inter', system-ui, sans-serif;
-    --radius:   10px;
-  }
+/* ── ตั้งค่า Web App URL ของ Apps Script ตรงนี้ ── */
+/* แก้ไข APPS_SCRIPT_URL ใน <script> ด้านล่าง */
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #0d1117;
+  --surf:    #161b22;
+  --card:    #1c2230;
+  --border:  rgba(255,255,255,.08);
+  --border2: rgba(255,255,255,.14);
+  --text:    #e6edf3;
+  --muted:   #8b949e;
+  --accent:  #3b82f6;
+  --acc2:    #60a5fa;
+  --green:   #3fb950;
+  --red:     #f85149;
+  --mono:    'JetBrains Mono', monospace;
+  --sans:    'Inter', system-ui, sans-serif;
+  --r:       10px;
+}
 
-  body {
-    font-family: var(--sans);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-    line-height: 1.6;
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-  /* ── TOP BAR ── */
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 52px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .topbar-left { display: flex; align-items: center; gap: 12px; }
-  .logo-mark {
-    width: 28px; height: 28px;
-    background: var(--accent);
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono);
-    font-size: 11px; font-weight: 600;
-    color: #fff;
-    letter-spacing: -.5px;
-  }
-  .topbar-title { font-size: 13px; font-weight: 600; color: var(--text); }
-  .topbar-sub { font-size: 11px; color: var(--muted); }
-  .topbar-right { display: flex; align-items: center; gap: 10px; }
-  .api-input {
-    background: var(--card);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 5px 10px;
-    width: 280px;
-    outline: none;
-    transition: border-color .2s;
-  }
-  .api-input::placeholder { color: var(--muted); }
-  .api-input:focus { border-color: var(--accent); }
-  .btn {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    padding: 5px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity .15s;
-    font-family: var(--sans);
-    white-space: nowrap;
-  }
-  .btn:hover { opacity: .85; }
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border2);
-    color: var(--muted);
-    border-radius: var(--radius);
-    padding: 5px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: border-color .15s, color .15s;
-    font-family: var(--sans);
-  }
-  .btn-ghost:hover { border-color: var(--accent2); color: var(--accent2); }
-  .status-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--muted); display: inline-block;
-    transition: background .3s;
-  }
-  .status-dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
-  .status-dot.error { background: var(--red); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
 
-  /* ── LAYOUT ── */
-  .page { max-width: 1200px; margin: 0 auto; padding: 20px 24px 48px; }
+/* ── TOPBAR ── */
+.topbar{background:var(--surf);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100;gap:12px;flex-wrap:wrap}
+.tb-left{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:30px;height:30px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.tb-title{font-size:13px;font-weight:600;white-space:nowrap}
+.tb-sub{font-size:11px;color:var(--muted);white-space:nowrap}
+.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
+.sdot.live{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+.sdot.err{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.stxt{font-size:11px;color:var(--muted);white-space:nowrap}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:var(--r);padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:opacity .15s;white-space:nowrap}
+.btn:hover{opacity:.85}
+.btn-g{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:var(--r);padding:5px 12px;font-size:12px;cursor:pointer;font-family:var(--sans);transition:all .15s;white-space:nowrap}
+.btn-g:hover{border-color:var(--acc2);color:var(--acc2)}
 
-  /* ── SECTION HEADER ── */
-  .section-head {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .section-label {
-    font-size: 11px; font-weight: 600; letter-spacing: .08em;
-    text-transform: uppercase; color: var(--muted);
-  }
-  .date-badge {
-    font-family: var(--mono);
-    font-size: 11px; color: var(--muted);
-    background: var(--card);
-    border: 1px solid var(--border);
-    padding: 3px 10px; border-radius: 20px;
-  }
+/* ── PAGE ── */
+.page{max-width:1200px;margin:0 auto;padding:20px 20px 60px}
 
-  /* ── KPI CARDS ── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .kpi-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    transition: border-color .2s;
-  }
-  .kpi-card:hover { border-color: var(--border2); }
-  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-  .kpi-value {
-    font-family: var(--mono);
-    font-size: 22px; font-weight: 600;
-    color: var(--text);
-    line-height: 1.1;
-    letter-spacing: -.5px;
-  }
-  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .kpi-card.accent-card { border-color: rgba(59,130,246,.3); background: rgba(59,130,246,.06); }
-  .kpi-card.accent-card .kpi-value { color: var(--accent2); }
-  .kpi-card.red-card { border-color: rgba(248,81,73,.25); }
-  .kpi-card.red-card .kpi-value { color: var(--red); }
+/* ── SECTION HEADER ── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.dbadge{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);padding:3px 10px;border-radius:20px}
 
-  /* ── CHART ROW ── */
-  .chart-row {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  @media (max-width: 860px) { .chart-row { grid-template-columns: 1fr; } }
+/* ── KPI GRID ── */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.kcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;transition:border-color .2s}
+.kcard:hover{border-color:var(--border2)}
+.kcard.acc{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.06)}
+.kcard.acc .kv{color:var(--acc2)}
+.kcard.red{border-color:rgba(248,81,73,.25)}
+.kcard.red .kv{color:var(--red)}
+.kl{font-size:11px;color:var(--muted);margin-bottom:3px}
+.kv{font-family:var(--mono);font-size:21px;font-weight:600;line-height:1.1;letter-spacing:-.5px}
+.ks{font-size:11px;color:var(--muted);margin-top:2px}
 
-  .chart-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 18px;
-  }
-  .chart-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
-  .chart-wrap { position: relative; width: 100%; }
+/* ── CHART ROW ── */
+.crow{display:grid;grid-template-columns:1fr 320px;gap:12px;margin-bottom:20px}
+@media(max-width:820px){.crow{grid-template-columns:1fr}}
+.ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.ctitle{font-size:12px;font-weight:600;margin-bottom:12px}
+.cwrap{position:relative;width:100%}
+.tabs{display:flex;gap:4px;margin-bottom:12px}
+.tab{font-size:11px;font-weight:500;padding:4px 12px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--sans);transition:all .15s}
+.tab:hover{color:var(--text)}
+.tab.on{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.3);color:var(--acc2)}
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.lsq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
 
-  /* ── TABS ── */
-  .tabs { display: flex; gap: 4px; margin-bottom: 14px; }
-  .tab {
-    font-size: 11px; font-weight: 500;
-    padding: 4px 12px;
-    border-radius: 6px;
-    border: 1px solid transparent;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    font-family: var(--sans);
-    transition: all .15s;
-  }
-  .tab:hover { color: var(--text); }
-  .tab.on { background: rgba(59,130,246,.15); border-color: rgba(59,130,246,.3); color: var(--accent2); }
+/* ── TABLE ── */
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:8px 14px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+th.r,td.r{text-align:right}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+tbody td{padding:9px 14px;border-bottom:1px solid var(--border);font-size:13px}
+tbody tr:last-child td{border-bottom:none}
+td.mono{font-family:var(--mono);font-size:12px}
+.sname{font-weight:600}
+.rank{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.bw{display:flex;align-items:center;gap:6px}
+.bt{flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px;min-width:50px}
+.bf{height:100%;background:var(--accent);border-radius:2px}
+.bpct{font-size:10px;color:var(--muted);font-family:var(--mono);min-width:30px}
 
-  /* ── LEGEND ── */
-  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
-  .legend-sq { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+/* ── LOADING ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(13,17,23,.8);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.overlay.show{display:flex}
+.spin{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
 
-  /* ── TABLE ── */
-  .table-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-  .table-card-head {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    text-align: left; padding: 8px 14px;
-    font-size: 11px; font-weight: 600; letter-spacing: .06em;
-    text-transform: uppercase; color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  thead th.r { text-align: right; }
-  tbody tr { transition: background .1s; }
-  tbody tr:hover { background: rgba(255,255,255,.03); }
-  tbody td { padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
-  tbody tr:last-child td { border-bottom: none; }
-  td.r { text-align: right; font-family: var(--mono); font-size: 12px; }
-  .rank { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 24px; }
-  .store-name { font-weight: 600; font-size: 13px; }
-  .badge {
-    display: inline-block; font-size: 10px; font-weight: 600;
-    padding: 2px 7px; border-radius: 4px;
-    background: rgba(59,130,246,.15); color: var(--accent2);
-    font-family: var(--mono);
-  }
-  .bar-mini { display: flex; align-items: center; gap: 6px; }
-  .bar-track { flex: 1; height: 4px; background: rgba(255,255,255,.07); border-radius: 2px; min-width: 60px; }
-  .bar-fill { height: 100%; background: var(--accent); border-radius: 2px; }
-  .pct-label { font-size: 10px; color: var(--muted); font-family: var(--mono); min-width: 32px; }
+/* ── FOOTER ── */
+.footer{margin-top:32px;padding-top:20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);flex-wrap:wrap;gap:8px}
+.footer a{color:var(--muted);text-decoration:none}
+.footer a:hover{color:var(--acc2)}
 
-  /* ── FOOTER ── */
-  .footer {
-    margin-top: 32px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 11px; color: var(--muted);
-  }
-  .footer a { color: var(--muted); text-decoration: none; }
-  .footer a:hover { color: var(--accent2); }
-
-  /* ── LOADING ── */
-  .loading-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(13,17,23,.7);
-    z-index: 200; align-items: center; justify-content: center;
-    flex-direction: column; gap: 12px;
-  }
-  .loading-overlay.show { display: flex; }
-  .spinner {
-    width: 32px; height: 32px;
-    border: 2px solid var(--border2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* ── ERROR BANNER ── */
+.errbanner{display:none;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--red)}
+.errbanner.show{display:block}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<header class="topbar">
-  <div class="topbar-left">
-    <div class="logo-mark">SR</div>
-    <div>
-      <div class="topbar-title">Store Daily Sales Report</div>
-      <div class="topbar-sub">Greyhound Cafe · <span id="dateRange">—</span></div>
-    </div>
-  </div>
-  <div class="topbar-right">
-    <span class="status-dot" id="statusDot"></span>
-    <span style="font-size:11px;color:var(--muted)" id="statusText">ยังไม่ได้เชื่อมต่อ</span>
-    <input class="api-input" id="apiUrl" type="text"
-      placeholder="วาง Apps Script Web App URL…"
-      value="">
-    <button class="btn" onclick="fetchFromSheet()">โหลดข้อมูล</button>
-    <button class="btn-ghost" onclick="loadDemo()">Demo</button>
-  </div>
-</header>
-
-<!-- LOADING -->
-<div class="loading-overlay" id="loader">
-  <div class="spinner"></div>
+<!-- ── OVERLAY ── -->
+<div class="overlay" id="loader">
+  <div class="spin"></div>
   <div style="font-size:12px;color:var(--muted)">กำลังดึงข้อมูลจาก Google Sheet…</div>
 </div>
 
-<!-- PAGE -->
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <div class="tb-left">
+    <div class="logo">GH</div>
+    <div>
+      <div class="tb-title">Greyhound Cafe · Daily Sales Report</div>
+      <div class="tb-sub" id="drSub">—</div>
+    </div>
+  </div>
+  <div class="tb-right">
+    <span class="sdot" id="sdot"></span>
+    <span class="stxt" id="stxt">ยังไม่ได้โหลด</span>
+    <button class="btn" onclick="fetchData()">⟳ รีเฟรช</button>
+    <button class="btn-g" onclick="loadDemo()">Demo</button>
+  </div>
+</header>
+
 <main class="page">
 
-  <!-- KPI ROW -->
-  <div class="section-head" style="margin-top:4px">
-    <span class="section-label">ภาพรวม</span>
-    <span class="date-badge" id="kpiDateBadge">—</span>
+  <div class="errbanner" id="errBanner"></div>
+
+  <!-- KPI -->
+  <div class="sh" style="margin-top:4px">
+    <span class="sl">ภาพรวม</span>
+    <span class="dbadge" id="drBadge">—</span>
   </div>
-  <div class="kpi-grid" id="kpiGrid">
-    <div class="kpi-card accent-card"><div class="kpi-label">ยอดขายสุทธิ (Net)</div><div class="kpi-value" id="k1">—</div><div class="kpi-sub" id="k1s">—</div></div>
-    <div class="kpi-card"><div class="kpi-label">ยอดขายรวม (Gross)</div><div class="kpi-value" id="k2">—</div><div class="kpi-sub" id="k2s">—</div></div>
-    <div class="kpi-card red-card"><div class="kpi-label">คืนสินค้า (Returns)</div><div class="kpi-value" id="k3">—</div><div class="kpi-sub" id="k3s">—</div></div>
-    <div class="kpi-card"><div class="kpi-label">จำนวนออเดอร์</div><div class="kpi-value" id="k4">—</div><div class="kpi-sub" id="k4s">—</div></div>
-    <div class="kpi-card"><div class="kpi-label">จำนวนชิ้น</div><div class="kpi-value" id="k5">—</div><div class="kpi-sub" id="k5s">—</div></div>
-    <div class="kpi-card"><div class="kpi-label">จำนวนสาขา</div><div class="kpi-value" id="k6">—</div><div class="kpi-sub" id="k6s">—</div></div>
-    <div class="kpi-card"><div class="kpi-label">สาขายอดสูงสุด</div><div class="kpi-value" id="k7">—</div><div class="kpi-sub" id="k7s">—</div></div>
-    <div class="kpi-card"><div class="kpi-label">เฉลี่ย/ออเดอร์</div><div class="kpi-value" id="k8">—</div><div class="kpi-sub" id="k8s">—</div></div>
+  <div class="kgrid">
+    <div class="kcard acc"><div class="kl">ยอดขายสุทธิ (Net)</div><div class="kv" id="k1">—</div><div class="ks" id="k1s">—</div></div>
+    <div class="kcard"><div class="kl">ยอดขายรวม (Gross)</div><div class="kv" id="k2">—</div><div class="ks" id="k2s">—</div></div>
+    <div class="kcard red"><div class="kl">คืนสินค้า</div><div class="kv" id="k3">—</div><div class="ks" id="k3s">—</div></div>
+    <div class="kcard"><div class="kl">จำนวนออเดอร์</div><div class="kv" id="k4">—</div><div class="ks" id="k4s">—</div></div>
+    <div class="kcard"><div class="kl">จำนวนชิ้น</div><div class="kv" id="k5">—</div><div class="ks" id="k5s">—</div></div>
+    <div class="kcard"><div class="kl">สาขา</div><div class="kv" id="k6">—</div><div class="ks" id="k6s">—</div></div>
+    <div class="kcard"><div class="kl">สาขายอดสูงสุด</div><div class="kv" id="k7">—</div><div class="ks" id="k7s">—</div></div>
+    <div class="kcard"><div class="kl">เฉลี่ย / ออเดอร์</div><div class="kv" id="k8">—</div><div class="ks" id="k8s">—</div></div>
   </div>
 
   <!-- CHARTS -->
-  <div class="chart-row">
-    <!-- Daily / Store chart -->
-    <div class="chart-card">
+  <div class="crow">
+    <div class="ccard">
       <div class="tabs">
         <button class="tab on" onclick="switchTab('daily',this)">รายวัน</button>
         <button class="tab" onclick="switchTab('store',this)">ตามสาขา</button>
       </div>
-      <div class="chart-wrap" id="mainWrap" style="height:260px">
-        <canvas id="mainChart" role="img" aria-label="กราฟยอดขาย"></canvas>
-      </div>
-      <div class="legend" id="mainLegend"></div>
+      <div class="cwrap" id="mwrap" style="height:260px"><canvas id="mc" role="img" aria-label="กราฟยอดขาย"></canvas></div>
+      <div class="leg" id="mleg"></div>
     </div>
-
-    <!-- Tender donut -->
-    <div class="chart-card">
-      <div class="chart-title">วิธีชำระเงิน</div>
-      <div class="chart-wrap" style="height:200px">
-        <canvas id="tenderChart" role="img" aria-label="กราฟวิธีชำระเงิน"></canvas>
-      </div>
-      <div class="legend" id="tenderLegend" style="margin-top:12px"></div>
+    <div class="ccard">
+      <div class="ctitle">วิธีชำระเงิน</div>
+      <div class="cwrap" style="height:210px"><canvas id="tc" role="img" aria-label="วิธีชำระเงิน"></canvas></div>
+      <div class="leg" id="tleg" style="margin-top:12px"></div>
     </div>
   </div>
 
   <!-- STORE TABLE -->
-  <div class="section-head">
-    <span class="section-label">ยอดขายตามสาขา</span>
-    <span class="date-badge" id="storeDateBadge">—</span>
+  <div class="sh">
+    <span class="sl">ยอดขายตามสาขา</span>
+    <span class="dbadge" id="stBadge">—</span>
   </div>
-  <div class="table-card">
+  <div class="tcard">
     <table>
       <thead>
         <tr>
@@ -357,265 +193,237 @@
           <th class="r">ออเดอร์</th>
           <th class="r">ชิ้น</th>
           <th class="r">เฉลี่ย/ออเดอร์</th>
-          <th style="width:160px">สัดส่วน</th>
+          <th style="width:150px">สัดส่วน</th>
         </tr>
       </thead>
-      <tbody id="storeBody"></tbody>
+      <tbody id="stBody"></tbody>
     </table>
   </div>
 
-  <!-- FOOTER -->
   <div class="footer">
-    <span>Store Daily Sales Report · Powered by Google Sheets + Apps Script</span>
-    <span id="lastUpdated">—</span>
+    <span>Greyhound Cafe · Daily Sales Report · <a href="https://github.com/GREYHOUND1980/Daily-Sales-Greyhound" target="_blank">GitHub</a></span>
+    <span id="genTime">—</span>
   </div>
-
 </main>
 
 <script>
-/* ── DATA ── */
-const DEMO = {
-  dateRange: '01/08/69 – 05/08/69',
-  net: 2107362,
-  gross: 2166832,
-  returns: -59470,
-  orders: 1131,
-  items: 2118,
-  stores: 23,
-  topStore: 'MGB',
-  topStoreRev: 294802,
-  avgPerOrder: 1865,
-  daily: {
-    labels: ['1 ส.ค.','2 ส.ค.','3 ส.ค.','4 ส.ค.','5 ส.ค.'],
-    revenue: [536287, 520340, 379601, 414392, 314617],
-    receipts: [276, 278, 177, 211, 169]
-  },
-  storeList: [
-    {name:'MGB', rev:294802, items:254, rec:128},
-    {name:'OL02',rev:253786, items:280, rec:167},
-    {name:'CLD', rev:246785, items:223, rec:112},
-    {name:'SC1', rev:205816, items:203, rec:102},
-    {name:'GCW', rev:190147, items:187, rec:92},
-    {name:'SHS', rev:127442, items:118, rec:79},
-    {name:'SCP', rev:105737, items:107, rec:39},
-    {name:'GPG', rev:84200,  items:69,  rec:31},
-    {name:'EMQ', rev:67020,  items:70,  rec:34},
-    {name:'SCS', rev:61171,  items:63,  rec:37},
-    {name:'SC2', rev:59988,  items:54,  rec:34},
-    {name:'EML', rev:58971,  items:59,  rec:24},
-    {name:'SPM', rev:55903,  items:56,  rec:35},
-    {name:'CCL', rev:51568,  items:58,  rec:24},
-    {name:'PS4', rev:50277,  items:51,  rec:27},
-    {name:'CWV', rev:50043,  items:51,  rec:27},
-    {name:'PS1', rev:45234,  items:50,  rec:27},
-    {name:'MDP', rev:42439,  items:44,  rec:24},
-    {name:'CLP', rev:36830,  items:35,  rec:19},
-    {name:'CWD', rev:25773,  items:26,  rec:11},
-    {name:'MEC', rev:25488,  items:30,  rec:18},
-    {name:'PS7', rev:14458,  items:15,  rec:10},
-    {name:'PS2', rev:12958,  items:15,  rec:11},
-  ],
-  tender: {
-    labels: ['Visa','Cash','QR Payment','Mastercard','Store Credit','Alipay','Gift Card','Other'],
-    values: [499555, 409642, 387506, 385546, 118505, 75237, 63537, 228302]
-  }
-};
-
-/* ── HELPERS ── */
-const $ = id => document.getElementById(id);
-const fmt = n => new Intl.NumberFormat('th-TH').format(Math.round(Math.abs(n)));
-const fmtB = n => {
-  const a = Math.abs(n);
-  const sign = n < 0 ? '-' : '';
-  return a >= 1e6 ? sign + (a/1e6).toFixed(2) + 'M' : a >= 1e3 ? sign + (a/1e3).toFixed(0) + 'K' : sign + Math.round(a).toString();
-};
+// ================================================================
+//  ▼▼▼  ตั้งค่า Apps Script Web App URL ตรงนี้  ▼▼▼
+// ================================================================
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+// ================================================================
 
 const COLORS = ['#3b82f6','#f59e0b','#10b981','#a78bfa','#f87171','#34d399','#fb923c','#94a3b8'];
+const $ = id => document.getElementById(id);
 
-let mainChart = null, tenderChart = null, currentTab = 'daily', currentData = null;
+const fmt   = n => new Intl.NumberFormat('th-TH').format(Math.round(Math.abs(n)));
+const fmtB  = n => {
+  const a = Math.abs(n), s = n < 0 ? '-' : '';
+  return a >= 1e6 ? s+(a/1e6).toFixed(2)+'M' : a >= 1e3 ? s+(a/1e3).toFixed(0)+'K' : s+Math.round(a);
+};
 
-/* ── RENDER ── */
+let mainChart = null, tenderChart = null, curTab = 'daily', curData = null;
+
+// ── RENDER ─────────────────────────────────────────────────
 function render(d) {
-  currentData = d;
-
-  // Date badges
+  curData = d;
   const dr = d.dateRange || '—';
-  $('dateRange').textContent = dr;
-  $('kpiDateBadge').textContent = dr;
-  $('storeDateBadge').textContent = dr;
-  $('lastUpdated').textContent = 'อัปเดต ' + new Date().toLocaleString('th-TH', {dateStyle:'short', timeStyle:'short'});
+  $('drSub').textContent = dr;
+  $('drBadge').textContent = dr;
+  $('stBadge').textContent = dr;
+  $('genTime').textContent = 'สร้างเมื่อ ' + (d.generated || new Date().toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}));
 
   // KPIs
-  animateCount('k1', 0, d.net, v => '฿' + fmtB(v)); $('k1s').textContent = 'สุทธิหลังหักคืน';
-  animateCount('k2', 0, d.gross, v => '฿' + fmtB(v)); $('k2s').textContent = 'ก่อนหักคืนสินค้า';
-  $('k3').textContent = '-฿' + fmtB(Math.abs(d.returns)); $('k3s').textContent = ((Math.abs(d.returns)/d.gross)*100).toFixed(1) + '% ของยอดรวม';
-  animateCount('k4', 0, d.orders, v => Math.round(v).toLocaleString('th-TH')); $('k4s').textContent = 'ใบเสร็จทั้งหมด';
-  animateCount('k5', 0, d.items, v => Math.round(v).toLocaleString('th-TH')); $('k5s').textContent = (d.items/d.orders).toFixed(1) + ' ชิ้น/ออเดอร์';
+  cnt('k1', d.net,   v=>'฿'+fmtB(v));  $('k1s').textContent = 'สุทธิหลังหักคืน';
+  cnt('k2', d.gross, v=>'฿'+fmtB(v));  $('k2s').textContent = 'ก่อนหักคืนสินค้า';
+  $('k3').textContent = '-฿'+fmtB(Math.abs(d.returns));
+  $('k3s').textContent = d.gross ? ((Math.abs(d.returns)/d.gross)*100).toFixed(1)+'% ของยอดรวม' : '—';
+  cnt('k4', d.orders, v=>Math.round(v).toLocaleString('th-TH')); $('k4s').textContent = 'ใบเสร็จ';
+  cnt('k5', d.items,  v=>Math.round(v).toLocaleString('th-TH')); $('k5s').textContent = d.orders?(d.items/d.orders).toFixed(1)+' ชิ้น/ออเดอร์':'—';
   $('k6').textContent = d.stores; $('k6s').textContent = 'สาขาที่มีข้อมูล';
-  $('k7').textContent = d.topStore; $('k7s').textContent = '฿' + fmtB(d.topStoreRev);
-  animateCount('k8', 0, d.avgPerOrder, v => '฿' + fmtB(v)); $('k8s').textContent = 'ต่อออเดอร์';
+  $('k7').textContent = d.topStore||'—'; $('k7s').textContent = '฿'+fmtB(d.topStoreRev||0);
+  cnt('k8', d.avgPerOrder, v=>'฿'+fmtB(v)); $('k8s').textContent = 'เฉลี่ยต่อออเดอร์';
 
-  // Charts
-  buildMainChart(d);
-  buildTenderChart(d);
-
-  // Table
-  buildTable(d.storeList);
+  buildMain(d);
+  buildTender(d);
+  buildTable(d.storeList || []);
 }
 
-function animateCount(id, from, to, fmt, dur = 800) {
-  const el = $(id);
-  const start = performance.now();
-  function step(now) {
-    const p = Math.min((now - start) / dur, 1);
-    const ease = 1 - Math.pow(1 - p, 3);
-    el.textContent = fmt(from + (to - from) * ease);
-    if (p < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
+function cnt(id, to, fmt, dur=800) {
+  const el = $(id); const t0 = performance.now();
+  const go = now => { const p=Math.min((now-t0)/dur,1), e=1-Math.pow(1-p,3); el.textContent=fmt(to*e); if(p<1)requestAnimationFrame(go); };
+  requestAnimationFrame(go);
 }
 
-function buildMainChart(d) {
+// ── CHARTS ─────────────────────────────────────────────────
+function buildMain(d) {
   if (mainChart) { mainChart.destroy(); mainChart = null; }
-  const wrap = $('mainWrap');
-  const canvas = $('mainChart');
-  const leg = $('mainLegend');
-
-  if (currentTab === 'daily') {
+  const wrap=$('mwrap'), leg=$('mleg');
+  leg.innerHTML = '';
+  if (curTab === 'daily') {
     wrap.style.height = '260px';
-    leg.innerHTML = `<div class="legend-item"><span class="legend-sq" style="background:#3b82f6"></span>ยอดขาย (฿)</div><div class="legend-item"><span class="legend-sq" style="background:#f59e0b"></span>จำนวนออเดอร์</div>`;
-    mainChart = new Chart(canvas, {
-      type: 'bar',
-      data: {
+    leg.innerHTML = mkLeg([['#3b82f6','ยอดขาย (฿)'],['#f59e0b','จำนวนออเดอร์']]);
+    mainChart = new Chart($('mc'),{
+      type:'bar',
+      data:{
         labels: d.daily.labels,
-        datasets: [
-          { label: 'ยอดขาย', data: d.daily.revenue, backgroundColor: '#3b82f688', borderRadius: 5, borderSkipped: 'bottom', yAxisID: 'y' },
-          { label: 'ออเดอร์', data: d.daily.receipts, type: 'line', borderColor: '#f59e0b', pointBackgroundColor: '#f59e0b', pointRadius: 4, borderWidth: 2, backgroundColor: 'transparent', yAxisID: 'y2' }
+        datasets:[
+          {label:'ยอดขาย',data:d.daily.revenue,backgroundColor:'#3b82f688',borderRadius:5,borderSkipped:'bottom',yAxisID:'y'},
+          {label:'ออเดอร์',data:d.daily.receipts,type:'line',borderColor:'#f59e0b',pointBackgroundColor:'#f59e0b',pointRadius:4,borderWidth:2,backgroundColor:'transparent',yAxisID:'y2'}
         ]
       },
-      options: chartOpts({ y: true, y2: true, yFmt: v => '฿' + fmtB(v), y2Fmt: v => v + ' odr', tooltip: c => c.datasetIndex === 0 ? '฿' + fmt(c.parsed.y) : c.parsed.y + ' ออเดอร์' })
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.datasetIndex===0?'฿'+fmt(c.parsed.y):c.parsed.y+' ออเดอร์'}}},
+        scales:{
+          x:{ticks:{color:'#8b949e',font:{size:11}},grid:{display:false},border:{display:false}},
+          y:{ticks:{color:'#8b949e',font:{size:11},callback:v=>'฿'+fmtB(v)},grid:{color:'rgba(255,255,255,.05)'},border:{display:false}},
+          y2:{position:'right',ticks:{color:'#f59e0b',font:{size:11}},grid:{display:false},border:{display:false}}
+        }
+      }
     });
   } else {
-    const n = d.storeList.length;
-    wrap.style.height = Math.max(280, n * 30 + 60) + 'px';
-    leg.innerHTML = `<div class="legend-item"><span class="legend-sq" style="background:#3b82f6"></span>ยอดขาย (฿)</div>`;
-    mainChart = new Chart(canvas, {
-      type: 'bar',
-      data: {
-        labels: d.storeList.map(s => s.name),
-        datasets: [{ label: 'ยอดขาย', data: d.storeList.map(s => s.rev), backgroundColor: '#3b82f6aa', borderRadius: 4, borderSkipped: 'right' }]
-      },
-      options: {
-        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '฿' + fmt(c.parsed.x) } } },
-        scales: {
-          x: { ticks: { color: '#8b949e', font: { size: 10 }, callback: v => '฿' + fmtB(v) }, grid: { color: 'rgba(255,255,255,.05)' }, border: { display: false } },
-          y: { ticks: { color: '#8b949e', font: { size: 11 } }, grid: { display: false } }
+    const n = (d.storeList||[]).length;
+    wrap.style.height = Math.max(300, n*30+60)+'px';
+    leg.innerHTML = mkLeg([['#3b82f6','ยอดขาย (฿)']]);
+    mainChart = new Chart($('mc'),{
+      type:'bar',
+      data:{labels:d.storeList.map(s=>s.name),datasets:[{label:'ยอดขาย',data:d.storeList.map(s=>s.rev),backgroundColor:'#3b82f6aa',borderRadius:4,borderSkipped:'right'}]},
+      options:{
+        indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'฿'+fmt(c.parsed.x)}}},
+        scales:{
+          x:{ticks:{color:'#8b949e',font:{size:10},callback:v=>'฿'+fmtB(v)},grid:{color:'rgba(255,255,255,.05)'},border:{display:false}},
+          y:{ticks:{color:'#8b949e',font:{size:11}},grid:{display:false}}
         }
       }
     });
   }
 }
 
-function buildTenderChart(d) {
+function buildTender(d) {
   if (tenderChart) { tenderChart.destroy(); tenderChart = null; }
-  const total = d.tender.values.reduce((a, b) => a + b, 0);
-  const leg = $('tenderLegend');
-  leg.innerHTML = d.tender.labels.map((l, i) => {
-    const pct = ((d.tender.values[i] / total) * 100).toFixed(0);
-    return `<div class="legend-item"><span class="legend-sq" style="background:${COLORS[i % COLORS.length]}"></span>${l} <span style="color:#e6edf3;font-family:var(--mono);font-size:11px;margin-left:2px">${pct}%</span></div>`;
+  const total = (d.tender.values||[]).reduce((a,b)=>a+b,0);
+  const tleg = $('tleg');
+  tleg.innerHTML = (d.tender.labels||[]).map((l,i)=>{
+    const pct=total?((d.tender.values[i]/total)*100).toFixed(0):0;
+    return `<div class="li"><span class="lsq" style="background:${COLORS[i%COLORS.length]}"></span>${l} <span style="color:var(--text);font-family:var(--mono);font-size:11px;margin-left:2px">${pct}%</span></div>`;
   }).join('');
-
-  tenderChart = new Chart($('tenderChart'), {
-    type: 'doughnut',
-    data: {
-      labels: d.tender.labels,
-      datasets: [{ data: d.tender.values, backgroundColor: COLORS, hoverOffset: 10, borderWidth: 2, borderColor: '#1c2230' }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false, cutout: '62%',
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.label}: ฿${fmt(c.parsed)} (${((c.parsed/total)*100).toFixed(1)}%)` } } }
+  tenderChart = new Chart($('tc'),{
+    type:'doughnut',
+    data:{labels:d.tender.labels,datasets:[{data:d.tender.values,backgroundColor:COLORS,hoverOffset:10,borderWidth:2,borderColor:'#1c2230'}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ฿${fmt(c.parsed)} (${total?((c.parsed/total)*100).toFixed(1):0}%)`}}}
     }
   });
 }
 
-function chartOpts({ y, y2, yFmt, y2Fmt, tooltip }) {
-  return {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => tooltip(c) } } },
-    scales: {
-      x: { ticks: { color: '#8b949e', font: { size: 11 } }, grid: { display: false }, border: { display: false } },
-      ...(y ? { y: { ticks: { color: '#8b949e', font: { size: 11 }, callback: yFmt }, grid: { color: 'rgba(255,255,255,.05)' }, border: { display: false } } } : {}),
-      ...(y2 ? { y2: { position: 'right', ticks: { color: '#f59e0b', font: { size: 11 }, callback: y2Fmt }, grid: { display: false }, border: { display: false } } } : {})
-    }
-  };
+function mkLeg(items){
+  return items.map(([c,l])=>`<div class="li"><span class="lsq" style="background:${c}"></span>${l}</div>`).join('');
 }
 
 function buildTable(list) {
-  const max = list[0].rev;
-  $('storeBody').innerHTML = list.map((s, i) => {
-    const pct = Math.round(s.rev / max * 100);
-    const avg = Math.round(s.rev / s.rec);
+  const max = list[0]?.rev || 1;
+  $('stBody').innerHTML = list.map((s,i)=>{
+    const pct=Math.round(s.rev/max*100), avg=s.rec?Math.round(s.rev/s.rec):0;
     return `<tr>
-      <td class="rank">${i + 1}</td>
-      <td><span class="store-name">${s.name}</span></td>
-      <td class="r">฿${fmt(s.rev)}</td>
-      <td class="r">${fmt(s.rec)}</td>
-      <td class="r">${fmt(s.items)}</td>
-      <td class="r">฿${fmt(avg)}</td>
-      <td>
-        <div class="bar-mini">
-          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-          <span class="pct-label">${pct}%</span>
-        </div>
-      </td>
+      <td class="rank">${i+1}</td>
+      <td><span class="sname">${s.name}</span></td>
+      <td class="r mono">฿${fmt(s.rev)}</td>
+      <td class="r mono">${fmt(s.rec)}</td>
+      <td class="r mono">${fmt(s.items)}</td>
+      <td class="r mono">฿${fmt(avg)}</td>
+      <td><div class="bw"><div class="bt"><div class="bf" style="width:${pct}%"></div></div><span class="bpct">${pct}%</span></div></td>
     </tr>`;
   }).join('');
 }
 
-/* ── TAB SWITCH ── */
-function switchTab(tab, btn) {
-  currentTab = tab;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+// ── TAB ─────────────────────────────────────────────────────
+function switchTab(t, btn) {
+  curTab = t;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
   btn.classList.add('on');
-  if (currentData) buildMainChart(currentData);
+  if (curData) buildMain(curData);
 }
 
-/* ── FETCH FROM SHEET ── */
-async function fetchFromSheet() {
-  const url = $('apiUrl').value.trim();
-  if (!url) { alert('กรุณาใส่ Apps Script Web App URL ก่อนครับ'); return; }
+// ── FETCH ────────────────────────────────────────────────────
+async function fetchData() {
+  if (APPS_SCRIPT_URL.includes('YOUR_DEPLOYMENT_ID')) {
+    showErr('ยังไม่ได้ตั้งค่า APPS_SCRIPT_URL — แก้ไขใน index.html บรรทัด const APPS_SCRIPT_URL');
+    return;
+  }
   $('loader').classList.add('show');
-  setStatus('loading');
+  setStatus('');
+  hideErr();
   try {
-    const res = await fetch(url);
+    const res = await fetch(APPS_SCRIPT_URL);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const d = await res.json();
+    if (d.error) throw new Error(d.error);
     render(d);
-    setStatus('live');
-  } catch (e) {
-    setStatus('error', e.message);
-    alert('เชื่อมต่อไม่ได้: ' + e.message + '\n\nตรวจสอบ:\n1. URL ถูกต้อง\n2. Deploy เป็น "Anyone"\n3. CORS ใน Apps Script ถูกตั้ง');
+    setStatus('live', 'เชื่อมต่อแล้ว');
+  } catch(e) {
+    setStatus('err', 'เชื่อมต่อไม่ได้');
+    showErr('ข้อผิดพลาด: ' + e.message + ' — ตรวจสอบ URL และ CORS header ใน Apps Script');
   } finally {
     $('loader').classList.remove('show');
   }
 }
 
-function setStatus(s, msg) {
-  const dot = $('statusDot');
-  const txt = $('statusText');
-  dot.className = 'status-dot' + (s === 'live' ? ' live' : s === 'error' ? ' error' : '');
-  txt.textContent = s === 'live' ? 'เชื่อมต่อแล้ว' : s === 'error' ? 'เชื่อมต่อไม่ได้' : 'กำลังโหลด…';
+function setStatus(cls, txt) {
+  const dot=$('sdot'), stxt=$('stxt');
+  dot.className = 'sdot'+(cls?' '+cls:'');
+  stxt.textContent = txt || 'กำลังโหลด…';
 }
+function showErr(msg){ const b=$('errBanner'); b.textContent=msg; b.classList.add('show'); }
+function hideErr(){ $('errBanner').classList.remove('show'); }
 
-/* ── DEMO ── */
+// ── DEMO DATA ────────────────────────────────────────────────
 function loadDemo() {
-  setStatus('live');
-  render(DEMO);
+  hideErr();
+  setStatus('live','Demo mode');
+  render({
+    dateRange:'01/08/69 – 05/08/69',
+    generated: new Date().toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}),
+    net:2107362, gross:2166832, returns:-59470,
+    orders:1131, items:2118, stores:23,
+    topStore:'MGB', topStoreRev:294802, avgPerOrder:1865,
+    daily:{
+      labels:['1 ส.ค.','2 ส.ค.','3 ส.ค.','4 ส.ค.','5 ส.ค.'],
+      revenue:[536287,520340,379601,414392,314617],
+      receipts:[276,278,177,211,169],
+      items:[526,508,355,400,328]
+    },
+    storeList:[
+      {name:'MGB',rev:294802,items:254,rec:128},{name:'OL02',rev:253786,items:280,rec:167},
+      {name:'CLD',rev:246785,items:223,rec:112},{name:'SC1',rev:205816,items:203,rec:102},
+      {name:'GCW',rev:190147,items:187,rec:92},{name:'SHS',rev:127442,items:118,rec:79},
+      {name:'SCP',rev:105737,items:107,rec:39},{name:'GPG',rev:84200,items:69,rec:31},
+      {name:'EMQ',rev:67020,items:70,rec:34},{name:'SCS',rev:61171,items:63,rec:37},
+      {name:'SC2',rev:59988,items:54,rec:34},{name:'EML',rev:58971,items:59,rec:24},
+      {name:'SPM',rev:55903,items:56,rec:35},{name:'CCL',rev:51568,items:58,rec:24},
+      {name:'PS4',rev:50277,items:51,rec:27},{name:'CWV',rev:50043,items:51,rec:27},
+      {name:'PS1',rev:45234,items:50,rec:27},{name:'MDP',rev:42439,items:44,rec:24},
+      {name:'CLP',rev:36830,items:35,rec:19},{name:'CWD',rev:25773,items:26,rec:11},
+      {name:'MEC',rev:25488,items:30,rec:18},{name:'PS7',rev:14458,items:15,rec:10},
+      {name:'PS2',rev:12958,items:15,rec:11}
+    ],
+    tender:{
+      labels:['Visa','Cash','QR Payment','Mastercard','Store Credit','Alipay','Gift Card','AMEX/Diner','Other Card','อื่นๆ'],
+      values:[499555,409642,387506,385546,118505,75237,63537,29581,34727,162954]
+    }
+  });
 }
 
-/* ── AUTO-LOAD DEMO ── */
-window.onload = () => loadDemo();
+// ── INIT ────────────────────────────────────────────────────
+window.onload = () => {
+  if (APPS_SCRIPT_URL.includes('YOUR_DEPLOYMENT_ID')) {
+    loadDemo();
+  } else {
+    fetchData();
+  }
+};
 </script>
 </body>
 </html>
