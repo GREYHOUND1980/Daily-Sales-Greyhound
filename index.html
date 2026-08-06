@@ -231,7 +231,7 @@ function render(d) {
   $('drSub').textContent = dr;
   $('drBadge').textContent = dr;
   $('stBadge').textContent = dr;
-  $('genTime').textContent = 'สร้างเมื่อ ' + (d.generated || new Date().toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}));
+  $('genTime').textContent = 'สร้างเมื่อ ' + (d.generated || new Date().toLocaleString('th-TH-u-ca-gregory',{dateStyle:'short',timeStyle:'short'}));
 
   // KPIs
   cnt('k1', d.net,   v=>'฿'+fmtB(v));  $('k1s').textContent = 'สุทธิหลังหักคืน';
@@ -385,7 +385,10 @@ function loadDemo() {
   setStatus('live','Demo mode');
   render({
     dateRange:'01/08/69 – 05/08/69',
-    generated: new Date().toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}),
+    generated: new Date().toLocaleString('th-TH-u-ca-gregory', {
+  dateStyle:'short',
+  timeStyle:'short'
+}),
     net:2107362, gross:2166832, returns:-59470,
     orders:1131, items:2118, stores:23,
     topStore:'MGB', topStoreRev:294802, avgPerOrder:1865,
