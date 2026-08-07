@@ -443,7 +443,21 @@ function loadDemo(){
     tender:{labels:[],values:[]}
   });
 }
+function setStatus(cls, txt) {
+    const dot = $('sdot'), s = $('stxt');
+    dot.className = 'sdot' + (cls ? ' ' + cls : '');
+    s.textContent = txt;
+}
 
+function showErr(m) {
+    const b = $('errBanner');
+    b.textContent = m;
+    b.classList.add('show');
+}
+
+function hideErr() {
+    $('errBanner').classList.remove('show');
+}
 window.onload=()=>fetchData();
 </script>
 </body>
