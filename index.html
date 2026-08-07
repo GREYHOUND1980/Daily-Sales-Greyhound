@@ -204,7 +204,7 @@ tbody tr:last-child td{border-bottom:none}
 <script>
 Chart.register(ChartDataLabels);
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhr_pqHyepHduFsM51eoL7ZpFUSwaEcmHAkdaneiQtL7yTBjOyThPtjgrMIsLyuowh/exec";
+const APPS_SCRIPT_URL = "http://10.8.1.88:9005/api/sales";
 
 // ── GROUPS (CLP, CWD เพิ่มใน Shop) ──────────────────────────
 const GROUPS = [
@@ -384,25 +384,35 @@ function switchTab(t,btn){
 }
 
 // ── FETCH ────────────────────────────────────────────────────
-async function fetchData(){
-  $('loader').classList.add('show');
-  setStatus('','กำลังโหลด…'); hideErr();
-  try{
-    const res=await fetch(APPS_SCRIPT_URL);
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const d=await res.json();
-    if(d.error) throw new Error(d.error);
-    render(d); setStatus('live','เชื่อมต่อแล้ว');
-  }catch(e){
-    setStatus('err','เชื่อมต่อไม่ได้');
-    showErr('ข้อผิดพลาด: '+e.message);
-    loadDemo();
-  }finally{$('loader').classList.remove('show');}
-}
+async function fetchData() {
+    // ดึงข้อมูลเดือนนี้อัตโนมัติ
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    const dateTo   = `${y}-${m}-${d}`;
+    const dateFrom = `${y}-${m}-01`;
 
-function setStatus(cls,txt){$('sdot').className='sdot'+(cls?' '+cls:'');$('stxt').textContent=txt;}
-function showErr(m){const b=$('errBanner');b.textContent=m;b.classList.add('show');}
-function hideErr(){$('errBanner').classList.remove('show');}
+    $('loader').classList.add('show');
+    setStatus('', 'กำลังโหลด…');
+    hideErr();
+
+    try {
+        const url = `${APPS_SCRIPT_URL}?date_from=${dateFrom}&date_to=${dateTo}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        render(data);
+        setStatus('live', 'เชื่อมต่อแล้ว');
+    } catch(e) {
+        setStatus('err', 'เชื่อมต่อไม่ได้');
+        showErr('ข้อผิดพลาด: ' + e.message);
+        loadDemo();
+    } finally {
+        $('loader').classList.remove('show');
+    }
+}
 
 // ── DEMO ─────────────────────────────────────────────────────
 function loadDemo(){
