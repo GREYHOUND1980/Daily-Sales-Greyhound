@@ -248,18 +248,19 @@ tbody tr:last-child td{border-bottom:none}
     <table>
       <thead>
         <tr>
-          <th>วันที่</th>
-          <th>สาขา</th>
-          <th>ใบเสร็จ</th>
-          <th>รายการ (Item No.)</th>
-          <th class="r">Size</th>
-          <th class="r">Qty</th>
-          <th class="r">Full Price</th>
-          <th class="r">Disc %</th>
-          <th class="r">Net Price</th>
-          <th class="r">On-Top</th>
-          <th class="r">Pay Amt.</th>
-          <th>Tender</th>
+          <th>Store No.</th>
+          <th>Receipt No.</th>
+          <th>Item No.</th>
+          <th>Variant</th>          
+          <th class="r">Price</th>
+          <th class="r">Qty</th>          
+          <th class="r">Net Amount</th>
+          <th class="r">VAT Amount</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Category</th>
+          <th>Group</th>
+          <th>Sales Staff</th>
         </tr>
       </thead>
       <tbody id="detailBody"></tbody>
@@ -436,6 +437,7 @@ function buildDetailTable(rows){
     if(!byDate[r.date]) byDate[r.date]={};
     if(!byDate[r.date][r.store]) byDate[r.date][r.store]={};
     if(!byDate[r.date][r.store][r.receipt]) byDate[r.date][r.store][r.receipt]=[];
+    byDate[r.date][r.store][r.receipt] = byDate[r.date][r.store][r.receipt]||[];
     byDate[r.date][r.store][r.receipt].push(r);
   });
 
@@ -463,18 +465,19 @@ function buildDetailTable(rows){
           const g=getGroup(store);
           const badge=g?`<span class="grp-badge" style="background:${g.color}22;color:${g.color}">${g.name}</span>`:'';
           tr2.innerHTML=`
-            <td style="color:var(--muted)">${idx===0?item.date:''}</td>
-            <td>${idx===0?`<span class="sname">${store}</span>${badge}`:''}</td>
-            <td style="font-family:var(--mono);font-size:10px">${idx===0?receipt:''}</td>
+            <td style="font-family:var(--mono);font-size:11px">${item.store}</td>
+            <td style="font-family:var(--mono);font-size:10px">${item.receipt}</td>
             <td style="font-family:var(--mono);font-size:10px">${item.itemNo}</td>
-            <td class="r">${item.size}</td>
-            <td class="r">${item.qty}</td>
-            <td class="r" style="font-family:var(--mono)">${fmtD(item.fullPrice)}</td>
-            <td class="r">${item.discPct>0?item.discPct+'%':''}</td>
-            <td class="r" style="font-family:var(--mono)">${fmtD(item.netPrice)}</td>
-            <td class="r" style="font-family:var(--mono)">${item.onTop>0?fmtD(item.onTop):''}</td>
-            <td class="r" style="font-family:var(--mono);color:var(--text)">${fmtD(item.payAmt)}</td>
-            <td style="font-size:10px">${item.tender}</td>`;
+            <td class="r">${item.variantCode}</td>            
+            <td class="r" style="font-family:var(--mono)">${fmtD(item.price)}</td>
+            <td class="r">${item.qty}</td>            
+            <td class="r" style="font-family:var(--mono);color:var(--text)">${fmtD(item.netAmount)}</td>
+            <td class="r" style="font-family:var(--mono)">${fmtD(item.vatAmount)}</td>
+            <td style="font-family:var(--mono);font-size:10px">${item.date}</td>
+            <td style="font-family:var(--mono);font-size:10px">${item.time}</td>
+            <td>${item.itemCategory}</td>
+            <td>${item.productGroup}</td>
+            <td style="font-size:11px">${item.salesStaff}</td>`;
           body.appendChild(tr2);
         });
       });
@@ -609,7 +612,7 @@ async function doExportCSV(){
   }
   if($('cb-detail').checked&&det){
     csv+='=== รายละเอียดรายการ ===\n';
-    csv+=csvRow(['วันที่','สาขา','ใบเสร็จ','Item No.','Size','Qty','Full Price','Disc %','Net Price','On-Top','Pay Amt.','Tender'])+'\n';
+    csv+=csvRow(['Store No_','Receipt No_','Item No_','Variant Code','Price','Quantity','Net Amount','VAT Amount','Date','Time','Item Category Code','Product Group Code','Sales Staff'])+'\n';
     (det.rows||[]).forEach(r=>{
       csv+=csvRow([r.date,r.store,r.receipt,r.itemNo,r.size,r.qty,r.fullPrice,r.discPct,r.netPrice,r.onTop,r.payAmt,r.tender])+'\n';
     });
@@ -643,7 +646,7 @@ async function doExportExcel(){
   if($('cb-detail').checked&&det){
     const rows=[['วันที่','สาขา','ใบเสร็จ','Item No.','Size','Qty','Full Price','Disc %','Net Price','On-Top','Pay Amt.','Tender']];
     (det.rows||[]).forEach(r=>{
-      rows.push([r.date,r.store,r.receipt,r.itemNo,r.size,r.qty,r.fullPrice,r.discPct,r.netPrice,r.onTop,r.payAmt,r.tender]);
+      rows.push([r.store,r.receipt,r.itemNo,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.variantCode,r.itemCategory,r.productGroupr,r.salesStaff]);
     });
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'รายละเอียดรายการ');
   }
