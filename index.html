@@ -303,7 +303,7 @@ function render(d) {
   $('genTime').textContent = 'สร้างเมื่อ '+(d.generated||'—');
 
   const net = d.net||0;
-  const exVat = Math.round(net/1.07);
+  const exVat = Math.round(net);
 
   animTo('heroNet',   0, net, v=>'฿'+fmtM(Math.round(v)));
   animTo('hOrders',   0, d.orders||0, v=>Math.round(v).toLocaleString('th-TH'));
@@ -372,7 +372,7 @@ function buildMain(d){
   if(curTab==='daily'){
     mwrap.style.height='280px';
     leg.innerHTML=mkLeg([['#3b82f6','ยอดขาย (ก่อน VAT)'],['#f59e0b','ออเดอร์'],['#f85149','Sales Target/วัน']]);
-    const exVatRevenue = (d.daily.revenue||[]).map(v=>Math.round(v/1.07));
+    const exVatRevenue = (d.daily.revenue||[]).map(v=>Math.round(v));
     mainChart=new Chart($('mc'),{
       type:'bar',
       data:{
@@ -381,7 +381,7 @@ function buildMain(d){
           {label:'ยอดขาย',data:exVatRevenue,backgroundColor:'#3b82f699',borderRadius:4,borderSkipped:'bottom',yAxisID:'y',
            datalabels:{anchor:'end',align:'end',color:'#e6edf3',font:{size:9,family:"'JetBrains Mono',monospace"},formatter:v=>'฿'+fmtM(v)}},
           {label:'ออเดอร์',data:d.daily.receipts,type:'line',borderColor:'#f59e0b',pointBackgroundColor:'#f59e0b',pointRadius:3,borderWidth:1.5,backgroundColor:'transparent',yAxisID:'y2',datalabels:{display:false}},
-          {label:'Target',data:d.daily.labels.map(()=>Math.round(dailyTarget/1.07)),type:'line',borderColor:'#f85149',borderDash:[4,4],borderWidth:1.5,pointRadius:0,backgroundColor:'transparent',yAxisID:'y',datalabels:{display:false}}
+          {label:'Target',data:d.daily.labels.map(()=>Math.round(dailyTarget)),type:'line',borderColor:'#f85149',borderDash:[4,4],borderWidth:1.5,pointRadius:0,backgroundColor:'transparent',yAxisID:'y',datalabels:{display:false}}
         ]
       },
       options:{
