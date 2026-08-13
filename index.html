@@ -189,7 +189,7 @@ tbody tr:last-child td{border-bottom:none}
       <div class="hol">จำนวนออเดอร์</div>
     </div>
     <div class="hero-center">
-      <div class="hero-label">ยอดขายก่อน VAT</div>
+      <div class="hero-label">ยอดขาย (Net Amount)</div>
       <div class="hero-value" id="heroNet">—</div>
       <div class="hero-sub" id="heroSub">—</div>
     </div>
@@ -305,10 +305,10 @@ function render(d) {
   const net = d.net||0;
   const exVat = Math.round(net/1.07);
 
-  animTo('heroNet',   0, exVat, v=>'฿'+fmtM(Math.round(v)));
+  animTo('heroNet',   0, net, v=>'฿'+fmtM(Math.round(v)));
   animTo('hOrders',   0, d.orders||0, v=>Math.round(v).toLocaleString('th-TH'));
-  animTo('hAvg',      0, Math.round((d.avgPerOrder||0)/1.07), v=>'฿'+fmtM(Math.round(v)));
-  $('heroSub').textContent = `ยอดรวม Inc.VAT ฿${fmtM(net)}`;
+  animTo('hAvg',      0, d.avgPerOrder||0, v=>'฿'+fmtM(Math.round(v)));
+  $('heroSub').textContent = `${d.orders.toLocaleString('th-TH')} ออเดอร์`;
 
   buildTarget(d.storeList||[]);
   buildMain(d);
