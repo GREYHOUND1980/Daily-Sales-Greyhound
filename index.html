@@ -644,7 +644,7 @@ async function doExportExcel(){
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'ยอดขายตามสาขา');
   }
   if($('cb-detail').checked&&det){
-    const rows=[['วันที่','สาขา','ใบเสร็จ','Item No.','Size','Qty','Full Price','Disc %','Net Price','On-Top','Pay Amt.','Tender']];
+    const rows=[['Store','Receipt','ItemNo','Price.','Qty','NetAmount','vatAmount','Date %','Time','VariantCode','ItemCategory.','ProductGroupr','Staff']];
     (det.rows||[]).forEach(r=>{
       rows.push([r.store,r.receipt,r.itemNo,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.variantCode,r.itemCategory,r.productGroupr,r.salesStaff]);
     });
