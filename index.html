@@ -10,12 +10,12 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');
 :root{
-  --bg:#0d1117;--surf:#161b22;--card:#1c2230;
-  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);
-  --text:#e6edf3;--muted:#8b949e;
-  --accent:#3b82f6;--acc2:#60a5fa;
-  --green:#3fb950;--red:#f85149;--amber:#f59e0b;
-  --purple:#a78bfa;--teal:#10b981;
+  --bg:#f0f4f8;--surf:#ffffff;--card:#ffffff;
+  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.15);
+  --text:#1a202c;--muted:#64748b;
+  --accent:#2563eb;--acc2:#1d4ed8;
+  --green:#16a34a;--red:#dc2626;--amber:#d97706;
+  --purple:#7c3aed;--teal:#0d9488;
   --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
   --r:10px;
 }
@@ -50,7 +50,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .dbadge{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);padding:3px 10px;border-radius:20px}
 
 /* HERO */
-.hero{background:var(--card);border:1px solid rgba(59,130,246,.25);border-radius:14px;padding:22px 28px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.hero{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;border-radius:14px;padding:22px 28px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .hero-center{text-align:center;flex:1}
 .hero-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .hero-value{font-family:var(--mono);font-size:52px;font-weight:600;color:var(--acc2);letter-spacing:-2px;line-height:1}
@@ -64,18 +64,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .tc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .tc-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .tc-summary{font-family:var(--mono);font-size:13px;color:var(--text)}
-.big-bar-bg{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;margin-bottom:4px}
+.big-bar-bg{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin-bottom:4px}
 .big-bar-fill{height:100%;background:var(--accent);border-radius:4px;transition:width 1s ease}
 .big-bar-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:12px}
 .grp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 @media(max-width:900px){.grp-grid{grid-template-columns:repeat(2,1fr)}}
-.grp-card{background:rgba(255,255,255,.03);border-radius:var(--r);border:1px solid var(--border);padding:12px 14px}
+.grp-card{background:#f8fafc;border-radius:var(--r);border:1px solid var(--border);padding:12px 14px}
 .gc-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .gc-name{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:5px}
 .gc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .gc-pct-badge{font-size:10px;padding:1px 7px;border-radius:3px;font-weight:600;font-family:var(--mono)}
 .gc-val{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--text);margin-bottom:2px}
-.gc-bar-bg{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:5px}
+.gc-bar-bg{height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;margin-bottom:5px}
 .gc-bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
 .gc-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
 
@@ -91,7 +91,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 /* TABLE */
 .tcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
 table{width:100%;border-collapse:collapse;font-size:12px}
-thead th{text-align:left;padding:7px 10px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surf)}
+thead th{text-align:left;padding:7px 10px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;background:#f1f5f9}
 th.r,td.r{text-align:right}
 tbody tr:hover{background:rgba(255,255,255,.025)}
 tbody td{padding:7px 10px;border-bottom:1px solid var(--border);font-size:12px}
@@ -103,8 +103,8 @@ tbody tr:last-child td{border-bottom:none}
 .bf{height:100%;border-radius:2px}
 .bpct{font-size:10px;color:var(--muted);font-family:var(--mono);min-width:28px}
 .grp-badge{font-size:10px;padding:1px 6px;border-radius:3px;font-weight:600;font-family:var(--mono);display:inline-block;margin-left:5px}
-.day-row{background:rgba(59,130,246,.06);font-weight:600}
-.day-row td{border-bottom:1px solid rgba(59,130,246,.2);color:var(--acc2)}
+.day-row{background:#eff6ff;font-weight:600}
+.day-row td{border-bottom:1px solid #bfdbfe;color:#1d4ed8}
 .detail-row{background:rgba(255,255,255,.01)}
 .detail-row td{font-size:11px;color:var(--muted);padding:4px 10px}
 
@@ -379,7 +379,7 @@ function buildMain(d){
       data:{
         labels:d.daily.labels,
         datasets:[
-          {label:'ยอดขาย',data:exVatRevenue,backgroundColor:'#3b82f699',borderRadius:4,borderSkipped:'bottom',yAxisID:'y',
+          {label:'ยอดขาย',data:exVatRevenue,backgroundColor:'#2563ebcc',borderRadius:4,borderSkipped:'bottom',yAxisID:'y',
            datalabels:{anchor:'end',align:'end',color:'#e6edf3',font:{size:9,family:"'JetBrains Mono',monospace"},formatter:v=>'฿'+fmtM(v)}},
           {label:'ออเดอร์',data:d.daily.receipts,type:'line',borderColor:'#f59e0b',pointBackgroundColor:'#f59e0b',pointRadius:3,borderWidth:1.5,backgroundColor:'transparent',yAxisID:'y2',datalabels:{display:false}},
           {label:'Target',data:d.daily.labels.map(()=>Math.round(dailyTarget)),type:'line',borderColor:'#f85149',borderDash:[4,4],borderWidth:1.5,pointRadius:0,backgroundColor:'transparent',yAxisID:'y',datalabels:{display:false}}
@@ -390,7 +390,7 @@ function buildMain(d){
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{if(c.datasetIndex===1)return c.parsed.y+' ออเดอร์';if(c.datasetIndex===2)return 'Target ฿'+fmtM(c.parsed.y);return '฿'+fmtM(c.parsed.y);}}},datalabels:{}},
         scales:{
           x:{ticks:{color:'#8b949e',font:{size:10}},grid:{display:false},border:{display:false}},
-          y:{ticks:{color:'#8b949e',font:{size:10},callback:v=>'฿'+fmtM(v)},grid:{color:'rgba(255,255,255,.05)'},border:{display:false}},
+          y:{ticks:{color:'#8b949e',font:{size:10},callback:v=>'฿'+fmtM(v)},.day-row td{border-bottom:1px solid #bfdbfe;color:#1d4ed8},border:{display:false}},
           y2:{position:'right',ticks:{color:'#f59e0b',font:{size:10}},grid:{display:false},border:{display:false}}
         }
       }
@@ -411,7 +411,7 @@ function buildMain(d){
         indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:100}},
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'฿'+fmtM(c.parsed.x)}},datalabels:{}},
         scales:{
-          x:{ticks:{color:'#8b949e',font:{size:10},callback:v=>'฿'+fmtM(v)},grid:{color:'rgba(255,255,255,.05)'},border:{display:false}},
+          x:{ticks:{color:'#8b949e',font:{size:10},callback:v=>'฿'+fmtM(v)},.day-row td{border-bottom:1px solid #bfdbfe;color:#1d4ed8},border:{display:false}},
           y:{ticks:{color:'#8b949e',font:{size:11}},grid:{display:false}}
         }
       }
@@ -448,12 +448,12 @@ function buildDetailTable(rows){
     Object.values(storeObj).forEach(recObj=>{
       Object.entries(recObj).forEach(([rec,items])=>{
         dayRec.add(rec);
-        items.forEach(i=>{dayTotal+=i.payAmt; dayQty+=i.qty;});
+        items.forEach(i=>{dayTotal+=(i.netAmount||0); dayQty+=(i.qty||0);});
       });
     });
     // Day header row
     const tr=document.createElement('tr'); tr.className='day-row';
-    tr.innerHTML=`<td colspan="6"><strong>${date}</strong></td><td colspan="3" style="text-align:right;font-family:var(--mono)">฿${fmtD(dayTotal)}</td><td colspan="2" style="color:var(--muted);font-size:10px">${dayRec.size} ใบเสร็จ · ${dayQty} ชิ้น</td>`;
+    tr.innerHTML=`<td colspan="3"><strong>${date}</strong> <span style="font-size:10px;color:var(--muted)">${dayRec.size} ใบเสร็จ · ${dayQty} ชิ้น</span></td><td colspan="7"></td><td class="r" style="font-family:var(--mono);color:var(--acc2)">฿${fmtD(dayTotal)}</td><td colspan="2"></td>`;
     body.appendChild(tr);
 
     Object.keys(storeObj).sort().forEach(store=>{
@@ -644,9 +644,9 @@ async function doExportExcel(){
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'ยอดขายตามสาขา');
   }
   if($('cb-detail').checked&&det){
-    const rows=[['วันที่','สาขา','ใบเสร็จ','Item No.','Size','Qty','Full Price','Disc %','Net Price','On-Top','Pay Amt.','Tender']];
+    const rows=[['วันที่','สาขา','ใบเสร็จ','Item No.','Variant','Full Price','Qty','Date','Time','Net Amount','VAT Amount','Sales Staff']];
     (det.rows||[]).forEach(r=>{
-      rows.push([r.store,r.receipt,r.itemNo,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.variantCode,r.itemCategory,r.productGroupr,r.salesStaff]);
+      rows.push([r.store,r.receipt,r.itemNo,r.variantCode,r.itemCategory,r.productGroup,r.price,r.qty,r.date,r.time,r.netAmount,r.vatAmount,r.salesStaff]);
     });
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'รายละเอียดรายการ');
   }
