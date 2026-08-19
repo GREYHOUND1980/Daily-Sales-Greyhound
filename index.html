@@ -194,6 +194,8 @@ tbody tr:last-child td{border-bottom:none}
       <div class="hero-label">ยอดขาย (Net Amount)</div>
       <div class="hero-value" id="heroNet">—</div>
       <div class="hero-sub" id="heroSub">—</div>
+      <div style="margin-top:6px;font-size:13px;font-weight:600;color:rgba(255,255,255,.85)" id="heroGross">—</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px">Gross Amount (Inc. VAT)</div>
     </div>
     <div class="hero-side">
       <div class="hov" id="hAvg">—</div>
@@ -312,6 +314,7 @@ function render(d) {
   animTo('hOrders',   0, d.orders||0, v=>Math.round(v).toLocaleString('th-TH'));
   animTo('hAvg',      0, d.avgPerOrder||0, v=>'฿'+fmtM(Math.round(v)));
   $('heroSub').textContent = `${d.orders.toLocaleString('th-TH')} ออเดอร์`;
+  $('heroGross').textContent = '฿' + fmtM(d.gross||0);
 
   buildTarget(d.storeList||[]);
   buildMain(d);
@@ -664,7 +667,7 @@ function loadDemo(){
   $('detailDateTo').value=t;
   const d={
     dateRange:'01/08/2026 – 07/08/2026',generated:'07/08/2026 16:45',
-    net:2689813,orders:1449,avgPerOrder:1856,
+    net:5723871,gross:6124401,orders:3413,avgPerOrder:1677,
     daily:{
       labels:['01/08','02/08','03/08','04/08','05/08','06/08','07/08'],
       revenue:[536287,520340,379601,414392,320222,386463,133626],
