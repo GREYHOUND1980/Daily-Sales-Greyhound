@@ -406,6 +406,7 @@ tbody tr:last-child td { border-bottom:none; }
           <th>Store No_</th><th>Receipt No_</th><th>Item No_</th>
           <th>Variant</th><th class="r">Price</th><th class="r">Qty</th>
           <th class="r">Net Amount</th><th class="r">VAT Amount</th>
+          <th class="r">Gross Amount</th>
           <th>Date</th><th>Time</th>
           <th>Category</th><th>Group</th><th>Sales Staff</th>
         </tr>
@@ -572,7 +573,7 @@ function buildDetailTable(rows){
       <td></td><td></td>
       <td class="r" style="font-family:var(--mono);font-size:12px">฿${fmtD(dayNet)}</td>
       <td class="r" style="font-family:var(--mono);font-size:12px">฿${fmtD(dayVat)}</td>
-      <td colspan="5"></td>`;
+      <td colspan="6"></td>`;
     body.appendChild(tr);
     Object.keys(byDate[date]).sort().forEach(store=>{
       Object.keys(byDate[date][store]).sort().forEach(receipt=>{
@@ -588,6 +589,7 @@ function buildDetailTable(rows){
             <td class="r">${item.qty||0}</td>
             <td class="r" style="font-family:var(--mono);color:var(--text2);font-weight:600">${fmtD(item.netAmount)}</td>
             <td class="r" style="font-family:var(--mono)">${fmtD(item.vatAmount)}</td>
+            <td class="r" style="font-family:var(--mono);font-weight:600;color:var(--accent)">${fmtD(item.grossAmount||0)}</td>
             <td style="font-family:var(--mono);font-size:10px">${item.date||''}</td>
             <td style="font-family:var(--mono);font-size:10px">${item.time||''}</td>
             <td>${item.itemCategory||''}</td>
