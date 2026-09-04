@@ -45,7 +45,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 .page{max-width:1600px;margin:0 auto;padding:16px 24px 40px}
 
-/* FILTER PANEL */
 .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-sm);margin-bottom:16px}
 .panel-head{padding:10px 18px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--card2);border-radius:var(--r) var(--r) 0 0}
 .panel-body{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
@@ -60,16 +59,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .cb-inline{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
 .cb-inline input{accent-color:var(--accent)}
 
-/* STORE SELECTOR */
 .store-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.store-select{background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--text);outline:none;font-family:var(--sans);font-weight:600;min-width:200px}
+.store-select{background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--text);outline:none;font-family:var(--sans);font-weight:600;min-width:220px}
 .store-select:focus{border-color:var(--accent)}
 
-/* TABLE */
 .tcard{background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
 .tcard-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .tcard-title{font-size:13px;font-weight:600}
-.tbl-scroll{overflow:auto;max-height:calc(100vh - 340px)}
+.tbl-scroll{overflow:auto;max-height:calc(100vh - 360px)}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:#f8fafc;white-space:nowrap;position:sticky;top:0;z-index:5}
 th.r,td.r{text-align:right}
@@ -115,7 +112,6 @@ tbody tr:last-child td{border-bottom:none}
 <main class="page">
   <div class="errbanner" id="errBanner"></div>
 
-  <!-- STORE SELECTOR -->
   <div class="store-bar">
     <span style="font-size:12px;color:var(--muted);font-weight:600">เลือกสาขา:</span>
     <select class="store-select" id="storeSelect" onchange="loadStore()">
@@ -124,23 +120,22 @@ tbody tr:last-child td{border-bottom:none}
     <span style="font-size:11px;color:var(--muted)" id="storeInfo"></span>
   </div>
 
-  <!-- FILTER + SUMMARY PANEL -->
   <div class="panel">
     <div class="panel-head">Filter & Summaries</div>
     <div class="panel-body">
       <div class="filter-grid">
-        <span class="filter-label">Season Filter</span>
-        <select class="filter-select" id="fSeason" onchange="applyFilter()"><option value="">ทั้งหมด</option></select>
-        <span class="filter-label">Division Filter</span>
-        <select class="filter-select" id="fDivision" onchange="applyFilter()"><option value="">ทั้งหมด</option></select>
+        <span class="filter-label">Store Filter</span>
+        <input class="filter-input" id="fStore" placeholder="ค้นหา Store No." oninput="applyFilter()">
+        <span class="filter-label">Location Filter</span>
+        <input class="filter-input" id="fLocation" placeholder="ค้นหา Location Code" oninput="applyFilter()">
         <span class="filter-label">Item Category Filter</span>
         <select class="filter-select" id="fCategory" onchange="applyFilter()"><option value="">ทั้งหมด</option></select>
         <span class="filter-label">Product Grp. Filter</span>
         <select class="filter-select" id="fGroup" onchange="applyFilter()"><option value="">ทั้งหมด</option></select>
         <span class="filter-label">Item No. Filter</span>
         <input class="filter-input" id="fItemNo" placeholder="ค้นหา Item No." oninput="applyFilter()">
-        <span class="filter-label">Barcode Filter</span>
-        <input class="filter-input" id="fBarcode" placeholder="ค้นหา Barcode" oninput="applyFilter()">
+        <span class="filter-label">Size Filter</span>
+        <input class="filter-input" id="fSize" placeholder="ค้นหา Size" oninput="applyFilter()">
         <span></span>
         <button class="btn" onclick="applyFilter()" style="justify-self:start;margin-top:4px">🔄 Update Filter</button>
       </div>
@@ -155,15 +150,10 @@ tbody tr:last-child td{border-bottom:none}
           <span class="summary-label">แสดง / ทั้งหมด</span>
           <span class="summary-value" id="sRowCount">0 / 0</span>
         </div>
-        <div style="margin-top:14px" class="cb-inline">
-          <input type="checkbox" id="cbZero" onchange="applyFilter()">
-          <label for="cbZero">Include Zero Stock</label>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- TABLE -->
   <div class="tcard">
     <div class="tcard-head">
       <div class="tcard-title" id="tblTitle">รายการสินค้า</div>
@@ -173,24 +163,18 @@ tbody tr:last-child td{border-bottom:none}
         <thead>
           <tr>
             <th>Item Code</th>
-            <th>Barcodes</th>
             <th>Size</th>
-            <th class="r">Inventory</th>
-            <th class="r">Qty. Not Confirm</th>
-            <th class="r">Qty. Sold not Post</th>
+            <th class="r">Total Qty</th>
+            <th class="r">Sold Not Post</th>
             <th class="r">Actual Stock</th>
-            <th class="r">Qty. In-Transit (FS)</th>
             <th>Store No.</th>
             <th>Location Code</th>
-            <th class="r">Unit Price Inc.VAT</th>
-            <th class="r">Disc %</th>
-            <th class="r">Current Price</th>
             <th>Category</th>
             <th>Product Group</th>
           </tr>
         </thead>
         <tbody id="tblBody">
-          <tr><td colspan="15" class="empty">เลือกสาขาเพื่อดูข้อมูล</td></tr>
+          <tr><td colspan="9" class="empty">เลือกสาขาเพื่อดูข้อมูล</td></tr>
         </tbody>
       </table>
     </div>
@@ -203,11 +187,9 @@ const API_STOCK_DET = "https://greyhound_api.mobile1234.site/api/stock/detail";
 
 const $=id=>document.getElementById(id);
 const fmtN=n=>new Intl.NumberFormat('th-TH').format(Math.round(Math.abs(n)));
-const fmt2=n=>new Intl.NumberFormat('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Math.abs(n));
 
 let allRows=[], curStore='';
 
-// ── โหลดรายชื่อสาขา ──
 async function loadStoreList(){
   $('loader').classList.add('show');setStatus('','กำลังโหลด…');hideErr();
   try{
@@ -215,7 +197,9 @@ async function loadStoreList(){
     if(!r.ok) throw new Error('HTTP '+r.status);
     const d=await r.json();
     const sel=$('storeSelect');
-    (d.stores||[]).forEach(s=>{
+    // เรียงตามอักษร
+    const stores=(d.stores||[]).slice().sort((a,b)=>a.store.localeCompare(b.store));
+    stores.forEach(s=>{
       const opt=document.createElement('option');
       opt.value=s.store;
       opt.textContent=`${s.store} (${s.location}) — ${s.totalQty.toLocaleString('th-TH')} ชิ้น`;
@@ -227,10 +211,9 @@ async function loadStoreList(){
   finally{$('loader').classList.remove('show');}
 }
 
-// ── โหลดข้อมูลสาขาที่เลือก ──
 async function loadStore(){
   const store=$('storeSelect').value;
-  if(!store){allRows=[];$('tblBody').innerHTML='<tr><td colspan="15" class="empty">เลือกสาขาเพื่อดูข้อมูล</td></tr>';return;}
+  if(!store){allRows=[];$('tblBody').innerHTML='<tr><td colspan="9" class="empty">เลือกสาขาเพื่อดูข้อมูล</td></tr>';return;}
   curStore=store;
   $('loader').classList.add('show');hideErr();
   try{
@@ -246,7 +229,6 @@ async function loadStore(){
   finally{$('loader').classList.remove('show');}
 }
 
-// ── สร้าง dropdown filter options ──
 function buildFilterOptions(rows){
   const uniq=(key)=>[...new Set(rows.map(r=>r[key]).filter(v=>v))].sort();
   const fill=(id,vals)=>{
@@ -255,26 +237,22 @@ function buildFilterOptions(rows){
     vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});
     sel.value=cur;
   };
-  fill('fSeason',uniq('season'));
-  fill('fDivision',uniq('division'));
   fill('fCategory',uniq('category'));
   fill('fGroup',uniq('productGroup'));
 }
 
-// ── ใช้ filter ──
 function applyFilter(){
-  const fSea=$('fSeason').value, fDiv=$('fDivision').value, fCat=$('fCategory').value,
-        fGrp=$('fGroup').value, fItem=$('fItemNo').value.toUpperCase(),
-        fBar=$('fBarcode').value.toUpperCase(), incZero=$('cbZero').checked;
+  const fSto=$('fStore').value.toUpperCase(), fLoc=$('fLocation').value.toUpperCase(),
+        fCat=$('fCategory').value, fGrp=$('fGroup').value,
+        fItem=$('fItemNo').value.toUpperCase(), fSize=$('fSize').value.toUpperCase();
 
   const filtered=allRows.filter(r=>{
-    if(fSea && r.season!==fSea) return false;
-    if(fDiv && r.division!==fDiv) return false;
+    if(fSto && !String(r.store).toUpperCase().includes(fSto)) return false;
+    if(fLoc && !String(r.location).toUpperCase().includes(fLoc)) return false;
     if(fCat && r.category!==fCat) return false;
     if(fGrp && r.productGroup!==fGrp) return false;
     if(fItem && !r.itemNo.toUpperCase().includes(fItem)) return false;
-    if(fBar && !String(r.barcode).toUpperCase().includes(fBar)) return false;
-    if(!incZero && r.actualStock===0 && r.soldNotPost===0) return false;
+    if(fSize && !String(r.size).toUpperCase().includes(fSize)) return false;
     return true;
   });
 
@@ -283,7 +261,7 @@ function applyFilter(){
 }
 
 function updateSummary(rows){
-  const tQty=rows.reduce((a,r)=>a+(r.inventory||0),0);
+  const tQty=rows.reduce((a,r)=>a+(r.totalQty||0),0);
   const tSold=rows.reduce((a,r)=>a+(r.soldNotPost||0),0);
   const tActual=rows.reduce((a,r)=>a+(r.actualStock||0),0);
   $('sTotalQty').textContent=fmtN(tQty);
@@ -294,33 +272,26 @@ function updateSummary(rows){
 
 function buildTable(rows){
   const body=$('tblBody');
-  if(rows.length===0){body.innerHTML='<tr><td colspan="15" class="empty">ไม่มีข้อมูลตามเงื่อนไข</td></tr>';return;}
+  if(rows.length===0){body.innerHTML='<tr><td colspan="9" class="empty">ไม่มีข้อมูลตามเงื่อนไข</td></tr>';return;}
   body.innerHTML=rows.map(r=>`<tr>
     <td class="mono">${r.itemNo}</td>
-    <td class="mono" style="font-size:11px">${r.barcode||''}</td>
     <td class="hl">${r.size||''}</td>
-    <td class="r mono">${r.inventory||''}</td>
-    <td class="r mono" style="color:var(--muted2)">${r.notConfirm||''}</td>
+    <td class="r mono">${r.totalQty||''}</td>
     <td class="r mono" style="color:${r.soldNotPost>0?'var(--amber)':'var(--muted2)'}">${r.soldNotPost||''}</td>
     <td class="r mono qty-actual">${r.actualStock||''}</td>
-    <td class="r mono" style="color:var(--muted2)">${r.inTransit||''}</td>
     <td class="hl">${r.store}</td>
     <td class="mono" style="font-size:11px">${r.location}</td>
-    <td class="r mono">${fmt2(r.unitPrice)}</td>
-    <td class="r mono" style="color:var(--red)">${r.discount||0}</td>
-    <td class="r mono" style="color:var(--green);font-weight:600">${fmt2(r.currentPrice||0)}</td>
     <td>${r.category||''}</td>
     <td>${r.productGroup||''}</td>
   </tr>`).join('');
 }
 
-// ── EXPORT ──
 function exportData(){
   if(allRows.length===0){alert('ยังไม่มีข้อมูล');return;}
   const wb=XLSX.utils.book_new();
-  const head=['Item Code','Barcodes','Size','Inventory','Qty. Not Confirm','Qty. Sold not Post','Actual Stock','Qty. In-Transit (FS)','Store No.','Location Code','Unit Price Inc.VAT','Disc %','Current Price','Category','Product Group','Division','Season','Family'];
+  const head=['Item Code','Size','Total Qty','Sold Not Post','Actual Stock','Store No.','Location Code','Category','Product Group'];
   const rows=[head];
-  allRows.forEach(r=>rows.push([r.itemNo,r.barcode,r.size,r.inventory,r.notConfirm,r.soldNotPost,r.actualStock,r.inTransit,r.store,r.location,r.unitPrice,r.discount,r.currentPrice,r.category,r.productGroup,r.division,r.season,r.family]));
+  allRows.forEach(r=>rows.push([r.itemNo,r.size,r.totalQty,r.soldNotPost,r.actualStock,r.store,r.location,r.category,r.productGroup]));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),`Stock_${curStore}`);
   XLSX.writeFile(wb,`greyhound_stock_${curStore}_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
@@ -332,20 +303,19 @@ function hideErr(){$('errBanner').classList.remove('show');}
 function loadDemo(){
   setStatus('live','Demo mode');
   const sel=$('storeSelect');
-  ['OL01','SC1','MGB'].forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s+' (Demo)';sel.appendChild(o);});
-  sel.value='OL01';curStore='OL01';
+  ['CLD','MGB','SC1'].sort().forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s+' (Demo)';sel.appendChild(o);});
+  sel.value='CLD';curStore='CLD';
   allRows=[
-    {itemNo:'A22GT03253WH1A',barcode:'20446020',size:'L',inventory:2,notConfirm:0,soldNotPost:0,actualStock:2,inTransit:0,store:'OL01',location:'OL01',unitPrice:1500,discount:70,currentPrice:450,category:'GT',productGroup:'GT03',division:'',season:'A22',family:'03'},
-    {itemNo:'A22GT03253WH1A',barcode:'20446021',size:'M',inventory:4,notConfirm:0,soldNotPost:0,actualStock:4,inTransit:0,store:'OL01',location:'OL01',unitPrice:1500,discount:70,currentPrice:450,category:'GT',productGroup:'GT03',division:'',season:'A22',family:'03'},
-    {itemNo:'A22GT03253WH1A',barcode:'20446023',size:'S',inventory:3,notConfirm:0,soldNotPost:0,actualStock:3,inTransit:0,store:'OL01',location:'OL01',unitPrice:1500,discount:70,currentPrice:450,category:'GT',productGroup:'GT03',division:'',season:'A22',family:'03'},
+    {itemNo:'S26MD01132GR1A',size:'S',totalQty:4,soldNotPost:0,actualStock:4,store:'CLD',location:'FS03',category:'MD',productGroup:'MD01'},
+    {itemNo:'S26MD01132NB1A',size:'2L',totalQty:2,soldNotPost:0,actualStock:2,store:'CLD',location:'FS03',category:'MD',productGroup:'MD01'},
+    {itemNo:'S26MD01132NB1A',size:'L',totalQty:3,soldNotPost:0,actualStock:3,store:'CLD',location:'FS03',category:'MD',productGroup:'MD01'},
+    {itemNo:'S26MD01132NB1A',size:'M',totalQty:5,soldNotPost:0,actualStock:5,store:'CLD',location:'FS03',category:'MD',productGroup:'MD01'},
   ];
   buildFilterOptions(allRows);applyFilter();
-  $('tblTitle').textContent='รายการสินค้า — OL01 (Demo)';
+  $('tblTitle').textContent='รายการสินค้า — CLD (Demo)';
 }
 
 window.onload=()=>loadStoreList();
 </script>
 </body>
 </html>
-
-
