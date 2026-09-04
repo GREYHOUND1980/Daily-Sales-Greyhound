@@ -125,6 +125,10 @@ body {
 .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--acc-bg); }
 
 /* ── PAGE ── */
+.navtabs{display:flex;gap:4px;background:var(--surf);border-bottom:1px solid var(--border);padding:0 24px}
+.navtab{padding:12px 20px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent;transition:all .15s}
+.navtab:hover{color:var(--text)}
+.navtab.on{color:var(--accent);border-bottom-color:var(--accent)}
 .page { max-width: 1440px; margin: 0 auto; padding: 20px 24px 60px; }
 
 /* ── SECTION HEADER ── */
@@ -330,6 +334,10 @@ tbody tr:last-child td { border-bottom:none; }
   </div>
 </header>
 
+<nav class="navtabs">
+  <a href="index.html" class="navtab on">📊 ยอดขาย</a>
+  <a href="stock.html" class="navtab">📦 สต๊อกสินค้า</a>
+</nav>
 <main class="page">
   <div class="errbanner" id="errBanner"></div>
 
