@@ -344,7 +344,14 @@ tbody tr:last-child td { border-bottom:none; }
   <!-- HERO -->
   <div class="sh" style="margin-top:4px">
     <span class="sl">ภาพรวม</span>
-    <span class="dbadge" id="drBadge">—</span>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="tabs" id="periodTabs" style="margin-bottom:0">
+        <button class="tab on" data-period="month"     onclick="setPeriod('month',this)">เดือนนี้</button>
+        <button class="tab"    data-period="today"     onclick="setPeriod('today',this)">วันนี้</button>
+        <button class="tab"    data-period="yesterday" onclick="setPeriod('yesterday',this)">เมื่อวานนี้</button>
+      </div>
+      <span class="dbadge" id="drBadge">—</span>
+    </div>
   </div>
   <div class="hero">
     <div class="hero-side">
@@ -448,13 +455,13 @@ const $    = id => document.getElementById(id);
 const fmtM = n  => new Intl.NumberFormat('th-TH').format(Math.round(Math.abs(n)));
 const fmtD = n  => new Intl.NumberFormat('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Math.abs(Number(n)||0));
 
-let mainChart=null, curTab='daily', curData=null;
+let mainChart=null, curTab='daily', curData=null, curPeriod='month';
 
 /* ── RENDER ─────────────────────────────────── */
-function render(d){
+function render(d, targetData){
   curData = d;
   const dr = d.dateRange||'—';
-  ['drSub','drBadge','tgtBadge','chartBadge'].forEach(id=>$(id).textContent=dr);
+  ['drSub','drBadge','chartBadge'].forEach(id=>$(id).textContent=dr);
   $('genTime').textContent = 'อัปเดต '+(d.generated||'—');
   const net = d.net||0;
   animTo('heroNet', 0, net,              v=>'฿'+fmtM(Math.round(v)));
@@ -462,7 +469,9 @@ function render(d){
   animTo('hAvg',    0, d.avgPerOrder||0, v=>'฿'+fmtM(Math.round(v)));
   $('heroSub').textContent = `${(d.orders||0).toLocaleString('th-TH')} ออเดอร์`;
   $('heroGross').textContent = '฿' + fmtM(d.gross||0);
-  buildTarget(d.storeList||[]);
+  const t = targetData || d;
+  $('tgtBadge').textContent = t.dateRange||'—';
+  buildTarget(t.storeList||[]);
   buildMain(d);
 }
 
@@ -621,20 +630,38 @@ function switchTab(t,btn){
 /* ── FETCH ───────────────────────────────────── */
 function todayStr(){const t=new Date();return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;}
 function monthStartStr(){const t=new Date();return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-01`;}
+function yesterdayStr(){const t=new Date();t.setDate(t.getDate()-1);return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;}
+
+function getRange(period){
+  if(period==='today')     { const s=todayStr();     return {dateFrom:s, dateTo:s}; }
+  if(period==='yesterday') { const s=yesterdayStr();  return {dateFrom:s, dateTo:s}; }
+  return {dateFrom:monthStartStr(), dateTo:todayStr()}; // month (default)
+}
+
+function setPeriod(period,btn){
+  curPeriod=period;
+  document.querySelectorAll('#periodTabs .tab').forEach(x=>x.classList.remove('on'));
+  btn.classList.add('on');
+  fetchData();
+}
 
 async function fetchData(){
-  const dateFrom=monthStartStr(),dateTo=todayStr();
+  const {dateFrom,dateTo}=getRange(curPeriod);
+  const needsMonth=curPeriod!=='month'; // Sales Target card always tracks the full month
   $('detailDateFrom').value=dateTo;$('detailDateTo').value=dateTo;
   $('loader').classList.add('show');setStatus('','กำลังโหลด…');hideErr();
   try{
-    const [r1,r2]=await Promise.all([
+    const reqs=[
       fetch(`${API}?date_from=${dateFrom}&date_to=${dateTo}`),
       fetch(`${API_DET}?date_from=${dateTo}&date_to=${dateTo}`)
-    ]);
+    ];
+    if(needsMonth) reqs.push(fetch(`${API}?date_from=${monthStartStr()}&date_to=${todayStr()}`));
+    const [r1,r2,r3]=await Promise.all(reqs);
     if(!r1.ok) throw new Error('API HTTP '+r1.status);
     const data=await r1.json();
     if(data.error) throw new Error(data.error);
-    render(data);
+    const monthData=needsMonth&&r3&&r3.ok ? await r3.json() : null;
+    render(data, monthData);
     if(r2.ok){const det=await r2.json();buildDetailTable(det.rows||[]);$('stBadge').textContent=dateTo;}
     setStatus('live','เชื่อมต่อแล้ว');
   }catch(e){
