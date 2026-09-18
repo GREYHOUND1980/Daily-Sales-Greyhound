@@ -302,6 +302,12 @@ tbody tr:last-child td { border-bottom:none; }
     <div class="modal-title">⬇ Export ข้อมูล</div>
     <div class="form-row"><label class="form-label">วันที่เริ่มต้น</label><input class="form-input" type="date" id="expFrom"></div>
     <div class="form-row"><label class="form-label">วันที่สิ้นสุด</label><input class="form-input" type="date" id="expTo"></div>
+    <div class="form-row">
+      <label class="form-label">สาขา (ไม่เลือก = ทุกสาขา)</label>
+      <select class="form-input" id="expStore" style="font-family:var(--sans)">
+        <option value="">— ทุกสาขา —</option>
+      </select>
+    </div>
     <div style="margin-bottom:10px;font-size:11px;color:var(--muted);font-weight:500">เลือกข้อมูลที่ต้องการ</div>
     <div class="cb-row"><input type="checkbox" id="cb-summary" checked> สรุปรายวัน</div>
     <div class="cb-row"><input type="checkbox" id="cb-store"   checked> ยอดขายตามสาขา</div>
@@ -447,6 +453,7 @@ const GROUPS  = [
   {key:'shop',    name:'Shop',         color:'#4f46e5', bg:'#eef2ff', stores:new Set(['CLD','SC1','GCW','MGB','SHS','SC2','SPM','GPG','SCS','EML','CWV','EMQ','PS1','CCL','MDP','PS4','SCP','PS7','PS2','PS3','CLP','CWD'])},
   {key:'online',  name:'Online',       color:'#0891b2', bg:'#ecfeff', stores:new Set(['MEC'])},
   {key:'tiktok',  name:'TikTok',       color:'#d97706', bg:'#fffbeb', stores:new Set(['TTS'])},
+  {key:'Shopee',  name:'Shopee',       color:'#d97706', bg:'#fffbeb', stores:new Set(['SPX'])},
   {key:'outside', name:'Outside Sales',color:'#7c3aed', bg:'#f5f3ff', stores:new Set(['OL01','OL02','OS04'])},
 ];
 function getGroup(n){for(const g of GROUPS)if(g.stores.has(n))return g;return null;}
@@ -692,12 +699,23 @@ function hideErr(){$('errBanner').classList.remove('show');}
 function openExport(){
   const t=new Date(),y=t.getFullYear(),m=String(t.getMonth()+1).padStart(2,'0'),d=String(t.getDate()).padStart(2,'0');
   $('expTo').value=`${y}-${m}-${d}`;$('expFrom').value=`${y}-${m}-01`;
+  // populate store dropdown
+  const sel=$('expStore');
+  sel.innerHTML='<option value="">— ทุกสาขา —</option>';
+  if(curData&&curData.storeList){
+    [...curData.storeList].sort((a,b)=>a.name.localeCompare(b.name)).forEach(s=>{
+      const o=document.createElement('option');
+      o.value=s.name; o.textContent=s.name;
+      sel.appendChild(o);
+    });
+  }
   $('exportModal').classList.add('show');
 }
 function closeExport(){$('exportModal').classList.remove('show');}
 
 async function getExportData(){
   const from=$('expFrom').value,to=$('expTo').value;
+  const filterStore=$('expStore').value;
   if(!from||!to){alert('กรุณาเลือกวันที่');return null;}
   $('loader').classList.add('show');
   try{
@@ -711,7 +729,7 @@ function csvRow(arr){return arr.map(v=>{const s=String(v??'');return s.includes(
 
 async function doExportCSV(){
   const d=await getExportData();if(!d) return;
-  const {sales,det,from,to}=d;
+  const {sales,det,from,to,filterStore}=d;
   let csv='';
   if($('cb-summary').checked&&sales){
     csv+='=== สรุปรายวัน ===\n';
@@ -722,13 +740,13 @@ async function doExportCSV(){
   if($('cb-store').checked&&sales){
     csv+='=== ยอดขายตามสาขา ===\n';
     csv+=csvRow(['สาขา','กลุ่ม','Net Amount','ออเดอร์','ชิ้น','เฉลี่ย/ออเดอร์'])+'\n';
-    (sales.storeList||[]).forEach(s=>{const g=getGroup(s.name);csv+=csvRow([s.name,g?g.name:'—',s.rev,s.rec,s.items,s.rec?Math.round(s.rev/s.rec):0])+'\n';});
+    (sales.storeList||[]).filter(s=>!d.filterStore||s.name===d.filterStore).forEach(s=>{const g=getGroup(s.name);csv+=csvRow([s.name,g?g.name:'—',s.rev,s.rec,s.items,s.rec?Math.round(s.rev/s.rec):0])+'\n';});
     csv+='\n';
   }
   if($('cb-detail').checked&&det){
     csv+='=== รายละเอียดรายการ ===\n';
     csv+=csvRow(['Store No_','Receipt No_','Item No_','Variant Code','Price','Qty','Net Amount','VAT Amount','Date','Time','Item Category','Product Group','Sales Staff'])+'\n';
-    (det.rows||[]).forEach(r=>csv+=csvRow([r.store,r.receipt,r.itemNo,r.variantCode,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.itemCategory,r.productGroup,r.salesStaff])+'\n');
+    (det.rows||[]).filter(r=>!d.filterStore||r.store===d.filterStore).forEach(r=>rows.push([r.store,r.receipt,r.itemNo,r.variantCode,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.itemCategory,r.productGroup,r.salesStaff])+'\n');
   }
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`greyhound_sales_${from}_${to}.csv`;a.click();
@@ -737,7 +755,7 @@ async function doExportCSV(){
 
 async function doExportExcel(){
   const d=await getExportData();if(!d) return;
-  const {sales,det,from,to}=d;
+  const {sales,det,from,to,filterStore}=d;
   const wb=XLSX.utils.book_new();
   if($('cb-summary').checked&&sales){
     const rows=[['วันที่','Net Amount','ออเดอร์','ชิ้น']];
@@ -746,12 +764,12 @@ async function doExportExcel(){
   }
   if($('cb-store').checked&&sales){
     const rows=[['สาขา','กลุ่ม','Net Amount','ออเดอร์','ชิ้น','เฉลี่ย/ออเดอร์']];
-    (sales.storeList||[]).forEach(s=>{const g=getGroup(s.name);rows.push([s.name,g?g.name:'—',s.rev,s.rec,s.items,s.rec?Math.round(s.rev/s.rec):0]);});
+    (sales.storeList||[]).filter(s=>!d.filterStore||s.name===d.filterStore).forEach(s=>{const g=getGroup(s.name);rows.push([s.name,g?g.name:'—',s.rev,s.rec,s.items,s.rec?Math.round(s.rev/s.rec):0]);});
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'ยอดขายตามสาขา');
   }
   if($('cb-detail').checked&&det){
     const rows=[['Store No_','Receipt No_','Item No_','Variant Code','Price','Qty','Net Amount','VAT Amount','Date','Time','Item Category','Product Group','Sales Staff']];
-    (det.rows||[]).forEach(r=>rows.push([r.store,r.receipt,r.itemNo,r.variantCode,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.itemCategory,r.productGroup,r.salesStaff]));
+    (det.rows||[]).filter(r=>!d.filterStore||r.store===d.filterStore).forEach(r=>rows.push([r.store,r.receipt,r.itemNo,r.variantCode,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.itemCategory,r.productGroup,r.salesStaff]));
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'รายละเอียดรายการ');
   }
   XLSX.writeFile(wb,`greyhound_sales_${from}_${to}.xlsx`);
