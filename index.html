@@ -698,29 +698,33 @@ function hideErr(){$('errBanner').classList.remove('show');}
 /* ── EXPORT ──────────────────────────────────── */
 function openExport(){
   const t=new Date(),y=t.getFullYear(),m=String(t.getMonth()+1).padStart(2,'0'),d=String(t.getDate()).padStart(2,'0');
-  $('expTo').value=`${y}-${m}-${d}`;$('expFrom').value=`${y}-${m}-01`;
-  // populate store dropdown
+  $('expTo').value=`${y}-${m}-${d}`;
+  $('expFrom').value=`${y}-${m}-01`;
+  const ALL_STORES=['CCL','CLD','CLP','CWD','CWV','EML','EMQ','GCW','GPG','MDP','MEC','MGB','OL01','OL02','OS04','PS1','PS2','PS3','PS4','PS7','SC1','SC2','SCP','SCS','SHS','SPM','SPX','TTS'].sort();
   const sel=$('expStore');
   sel.innerHTML='<option value="">— ทุกสาขา —</option>';
-  if(curData&&curData.storeList){
-    [...curData.storeList].sort((a,b)=>a.name.localeCompare(b.name)).forEach(s=>{
-      const o=document.createElement('option');
-      o.value=s.name; o.textContent=s.name;
-      sel.appendChild(o);
-    });
-  }
+  ALL_STORES.forEach(s=>{
+    const o=document.createElement('option');
+    o.value=s; o.textContent=s;
+    sel.appendChild(o);
+  });
   $('exportModal').classList.add('show');
 }
 function closeExport(){$('exportModal').classList.remove('show');}
 
 async function getExportData(){
-  const from=$('expFrom').value,to=$('expTo').value;
-  const filterStore=$('expStore').value;
+  const from=$('expFrom').value, to=$('expTo').value;
+  const filterStore=$('expStore')?$('expStore').value:'';
   if(!from||!to){alert('กรุณาเลือกวันที่');return null;}
   $('loader').classList.add('show');
   try{
-    const [r1,r2]=await Promise.all([fetch(`${API}?date_from=${from}&date_to=${to}`),fetch(`${API_DET}?date_from=${from}&date_to=${to}`)]);
-    return {sales:r1.ok?await r1.json():null, det:r2.ok?await r2.json():null, from, to};
+    const [r1,r2]=await Promise.all([
+      fetch(`${API}?date_from=${from}&date_to=${to}`),
+      fetch(`${API_DET}?date_from=${from}&date_to=${to}`)
+    ]);
+    const sales=r1.ok?await r1.json():null;
+    const det=r2.ok?await r2.json():null;
+    return {sales, det, from, to, filterStore};
   }catch(e){alert('ดึงข้อมูลไม่ได้: '+e.message);return null;}
   finally{$('loader').classList.remove('show');}
 }
