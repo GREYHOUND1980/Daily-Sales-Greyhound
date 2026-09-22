@@ -269,7 +269,9 @@ tbody tr:last-child td { border-bottom:none; }
 .form-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,70,229,.1); }
 .modal-btns { display:flex; gap:8px; margin-top:20px; justify-content:flex-end; }
 .cb-row { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text2); margin-bottom:9px; }
-.cb-row input { accent-color:var(--accent); width:14px; height:14px; }
+.cb-row input { accent-color:var(--accent)}
+.store-cb{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer}
+.store-cb input{accent-color:var(--accent);width:13px;height:13px;cursor:pointer}; width:14px; height:14px; }
 .btn-success {
   background:#16a34a; color:#fff; border:none; border-radius:8px;
   padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--sans);
@@ -304,9 +306,11 @@ tbody tr:last-child td { border-bottom:none; }
     <div class="form-row"><label class="form-label">วันที่สิ้นสุด</label><input class="form-input" type="date" id="expTo"></div>
     <div class="form-row">
       <label class="form-label">สาขา (ไม่เลือก = ทุกสาขา)</label>
-      <select class="form-input" id="expStore" style="font-family:var(--sans)">
-        <option value="">— ทุกสาขา —</option>
-      </select>
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <button onclick="selectAllStores(true)"  style="font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--card2);cursor:pointer">เลือกทั้งหมด</button>
+        <button onclick="selectAllStores(false)" style="font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--card2);cursor:pointer">ล้างทั้งหมด</button>
+      </div>
+      <div id="storeCheckboxes" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px 10px;max-height:160px;overflow-y:auto;background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:10px;font-size:12px"></div>
     </div>
     <div style="margin-bottom:10px;font-size:11px;color:var(--muted);font-weight:500">เลือกข้อมูลที่ต้องการ</div>
     <div class="cb-row"><input type="checkbox" id="cb-summary" checked> สรุปรายวัน</div>
@@ -701,20 +705,28 @@ function openExport(){
   $('expTo').value=`${y}-${m}-${d}`;
   $('expFrom').value=`${y}-${m}-01`;
   const ALL_STORES=['CCL','CLD','CLP','CWD','CWV','EML','EMQ','GCW','GPG','MDP','MEC','MGB','OL01','OL02','OS04','PS1','PS2','PS3','PS4','PS7','SC1','SC2','SCP','SCS','SHS','SPM','SPX','TTS'].sort();
-  const sel=$('expStore');
-  sel.innerHTML='<option value="">— ทุกสาขา —</option>';
-  ALL_STORES.forEach(s=>{
-    const o=document.createElement('option');
-    o.value=s; o.textContent=s;
-    sel.appendChild(o);
-  });
+  const box=$('storeCheckboxes');
+  box.innerHTML=ALL_STORES.map(s=>`
+    <label class="store-cb">
+      <input type="checkbox" name="expStoreCb" value="${s}">
+      ${s}
+    </label>`).join('');
   $('exportModal').classList.add('show');
+}
+
+function selectAllStores(v){
+  document.querySelectorAll('input[name="expStoreCb"]').forEach(cb=>cb.checked=v);
+}
+
+function getSelectedStores(){
+  const checked=[...document.querySelectorAll('input[name="expStoreCb"]:checked')].map(cb=>cb.value);
+  return checked.length>0 ? new Set(checked) : null; // null = ทุกสาขา
 }
 function closeExport(){$('exportModal').classList.remove('show');}
 
 async function getExportData(){
   const from=$('expFrom').value, to=$('expTo').value;
-  const filterStore=$('expStore')?$('expStore').value:'';
+  const selectedStores=getSelectedStores();
   if(!from||!to){alert('กรุณาเลือกวันที่');return null;}
   $('loader').classList.add('show');
   try{
@@ -724,7 +736,7 @@ async function getExportData(){
     ]);
     const sales=r1.ok?await r1.json():null;
     const det=r2.ok?await r2.json():null;
-    return {sales, det, from, to, filterStore};
+    return {sales, det, from, to, selectedStores};
   }catch(e){alert('ดึงข้อมูลไม่ได้: '+e.message);return null;}
   finally{$('loader').classList.remove('show');}
 }
@@ -744,13 +756,13 @@ async function doExportCSV(){
   if($('cb-store').checked&&sales){
     csv+='=== ยอดขายตามสาขา ===\n';
     csv+=csvRow(['สาขา','กลุ่ม','Net Amount','ออเดอร์','ชิ้น','เฉลี่ย/ออเดอร์'])+'\n';
-    (sales.storeList||[]).filter(s=>!d.filterStore||s.name===d.filterStore).forEach(s=>{const g=getGroup(s.name);csv+=csvRow([s.name,g?g.name:'—',s.rev,s.rec,s.items,s.rec?Math.round(s.rev/s.rec):0])+'\n';});
+    (sales.storeList||[]).filter(s=>!d.selectedStores||d.selectedStores.has(s.name)).forEach(s=>{const g=getGroup(s.name);csv+=csvRow([s.name,g?g.name:'—',s.rev,s.rec,s.items,s.rec?Math.round(s.rev/s.rec):0])+'\n';});
     csv+='\n';
   }
   if($('cb-detail').checked&&det){
     csv+='=== รายละเอียดรายการ ===\n';
     csv+=csvRow(['Store No_','Receipt No_','Item No_','Variant Code','Price','Qty','Net Amount','VAT Amount','Date','Time','Item Category','Product Group','Sales Staff'])+'\n';
-    (det.rows||[]).filter(r=>!d.filterStore||r.store===d.filterStore).forEach(r=>rows.push([r.store,r.receipt,r.itemNo,r.variantCode,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.itemCategory,r.productGroup,r.salesStaff])+'\n');
+    (det.rows||[]).filter(r=>!d.selectedStores||d.selectedStores.has(r.store)).forEach(r=>rows.push([r.store,r.receipt,r.itemNo,r.variantCode,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.itemCategory,r.productGroup,r.salesStaff])+'\n');
   }
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`greyhound_sales_${from}_${to}.csv`;a.click();
@@ -768,12 +780,12 @@ async function doExportExcel(){
   }
   if($('cb-store').checked&&sales){
     const rows=[['สาขา','กลุ่ม','Net Amount','ออเดอร์','ชิ้น','เฉลี่ย/ออเดอร์']];
-    (sales.storeList||[]).filter(s=>!d.filterStore||s.name===d.filterStore).forEach(s=>{const g=getGroup(s.name);rows.push([s.name,g?g.name:'—',s.rev,s.rec,s.items,s.rec?Math.round(s.rev/s.rec):0]);});
+    (sales.storeList||[]).filter(s=>!d.selectedStores||d.selectedStores.has(s.name)).forEach(s=>{const g=getGroup(s.name);rows.push([s.name,g?g.name:'—',s.rev,s.rec,s.items,s.rec?Math.round(s.rev/s.rec):0]);});
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'ยอดขายตามสาขา');
   }
   if($('cb-detail').checked&&det){
     const rows=[['Store No_','Receipt No_','Item No_','Variant Code','Price','Qty','Net Amount','VAT Amount','Date','Time','Item Category','Product Group','Sales Staff']];
-    (det.rows||[]).filter(r=>!d.filterStore||r.store===d.filterStore).forEach(r=>rows.push([r.store,r.receipt,r.itemNo,r.variantCode,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.itemCategory,r.productGroup,r.salesStaff]));
+    (det.rows||[]).filter(r=>!d.selectedStores||d.selectedStores.has(r.store)).forEach(r=>rows.push([r.store,r.receipt,r.itemNo,r.variantCode,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.itemCategory,r.productGroup,r.salesStaff]));
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'รายละเอียดรายการ');
   }
   XLSX.writeFile(wb,`greyhound_sales_${from}_${to}.xlsx`);
