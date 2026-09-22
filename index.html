@@ -771,24 +771,119 @@ async function doExportCSV(){
 
 async function doExportExcel(){
   const d=await getExportData();if(!d) return;
-  const {sales,det,from,to,filterStore}=d;
+  const {sales,det,from,to,selectedStores}=d;
   const wb=XLSX.utils.book_new();
+
+  // ── คำนวณสรุปรายวันจาก detail rows (filter สาขา) ──────
   if($('cb-summary').checked&&sales){
+    const filteredRows=(det&&det.rows||[]).filter(r=>!selectedStores||selectedStores.has(r.store));
+    // group by วันที่
+    const dayMap={};
+    filteredRows.forEach(r=>{
+      if(!dayMap[r.date]) dayMap[r.date]={net:0,orders:new Set(),items:0};
+      dayMap[r.date].net += r.netAmount||0;
+      dayMap[r.date].orders.add(r.receipt);
+      dayMap[r.date].items += r.qty||0;
+    });
     const rows=[['วันที่','Net Amount','ออเดอร์','ชิ้น']];
-    (sales.daily.labels||[]).forEach((lbl,i)=>rows.push([lbl,sales.daily.revenue[i]||0,sales.daily.receipts[i]||0,sales.daily.items[i]||0]));
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'สรุปรายวัน');
+    Object.keys(dayMap).sort().forEach(dt=>{
+      const v=dayMap[dt];
+      rows.push([dt, Math.round(v.net), v.orders.size, v.items]);
+    });
+    // ถ้าไม่ filter สาขา ใช้ยอดจาก API แทน (ครบถ้วนกว่า)
+    const useAPI=!selectedStores;
+    const finalRows=useAPI
+      ? [['วันที่','Net Amount','ออเดอร์','ชิ้น'],
+         ...(sales.daily.labels||[]).map((lbl,i)=>[lbl,sales.daily.revenue[i]||0,sales.daily.receipts[i]||0,sales.daily.items[i]||0])]
+      : rows;
+    const ws=XLSX.utils.aoa_to_sheet(finalRows);
+    // style header
+    const range=XLSX.utils.decode_range(ws['!ref']);
+    for(let c=range.s.c;c<=range.e.c;c++){
+      const cell=XLSX.utils.encode_cell({r:0,c});
+      if(!ws[cell]) continue;
+      ws[cell].s={font:{bold:true,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"2563EB"}},alignment:{horizontal:"center"}};
+    }
+    // column widths
+    ws['!cols']=[{wch:12},{wch:16},{wch:10},{wch:10}];
+    XLSX.utils.book_append_sheet(wb,ws,'สรุปรายวัน');
   }
+
+  // ── ยอดขายตามสาขา ──────────────────────────────────────
   if($('cb-store').checked&&sales){
     const rows=[['สาขา','กลุ่ม','Net Amount','ออเดอร์','ชิ้น','เฉลี่ย/ออเดอร์']];
-    (sales.storeList||[]).filter(s=>!d.selectedStores||d.selectedStores.has(s.name)).forEach(s=>{const g=getGroup(s.name);rows.push([s.name,g?g.name:'—',s.rev,s.rec,s.items,s.rec?Math.round(s.rev/s.rec):0]);});
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'ยอดขายตามสาขา');
+    (sales.storeList||[]).filter(s=>!selectedStores||selectedStores.has(s.name)).forEach(s=>{
+      const g=getGroup(s.name);
+      rows.push([s.name,g?g.name:'—',s.rev,s.rec,s.items,s.rec?Math.round(s.rev/s.rec):0]);
+    });
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:10},{wch:14},{wch:16},{wch:10},{wch:10},{wch:16}];
+    const range=XLSX.utils.decode_range(ws['!ref']);
+    for(let c=range.s.c;c<=range.e.c;c++){
+      const cell=XLSX.utils.encode_cell({r:0,c});
+      if(!ws[cell]) continue;
+      ws[cell].s={font:{bold:true,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"2563EB"}},alignment:{horizontal:"center"}};
+    }
+    XLSX.utils.book_append_sheet(wb,ws,'ยอดขายตามสาขา');
   }
+
+  // ── รายละเอียดรายการ ───────────────────────────────────
   if($('cb-detail').checked&&det){
-    const rows=[['Store No_','Receipt No_','Item No_','Variant Code','Price','Qty','Net Amount','VAT Amount','Date','Time','Item Category','Product Group','Sales Staff']];
-    (det.rows||[]).filter(r=>!d.selectedStores||d.selectedStores.has(r.store)).forEach(r=>rows.push([r.store,r.receipt,r.itemNo,r.variantCode,r.price,r.qty,r.netAmount,r.vatAmount,r.date,r.time,r.itemCategory,r.productGroup,r.salesStaff]));
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'รายละเอียดรายการ');
+    const rows=[['วันที่','สาขา','ใบเสร็จ','Item No.','Variant','Price','Qty','Net Amount','VAT Amount','Gross Amount','Time','Category','Group','Sales Staff']];
+    (det.rows||[]).filter(r=>!selectedStores||selectedStores.has(r.store)).forEach(r=>{
+      rows.push([r.date,r.store,r.receipt,r.itemNo,r.variantCode,r.price,r.qty,r.netAmount,r.vatAmount,r.grossAmount||0,r.time,r.itemCategory,r.productGroup,r.salesStaff]);
+    });
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:12},{wch:8},{wch:14},{wch:18},{wch:8},{wch:10},{wch:6},{wch:12},{wch:12},{wch:12},{wch:10},{wch:10},{wch:12},{wch:14}];
+    const range=XLSX.utils.decode_range(ws['!ref']);
+    for(let c=range.s.c;c<=range.e.c;c++){
+      const cell=XLSX.utils.encode_cell({r:0,c});
+      if(!ws[cell]) continue;
+      ws[cell].s={font:{bold:true,color:{rgb:"FFFFFF"}},fill:{fgColor:{rgb:"0F766E"}},alignment:{horizontal:"center"}};
+    }
+    // zebra rows
+    for(let r=1;r<=range.e.r;r++){
+      for(let c=range.s.c;c<=range.e.c;c++){
+        const cell=XLSX.utils.encode_cell({r,c});
+        if(!ws[cell]) ws[cell]={v:'',t:'s'};
+        ws[cell].s={...(ws[cell].s||{}),
+          fill:{fgColor:{rgb:r%2===0?'F1F5F9':'FFFFFF'}},
+          alignment:{horizontal:c>=5&&c<=9?'right':'left'}
+        };
+      }
+    }
+    XLSX.utils.book_append_sheet(wb,ws,'รายละเอียดรายการ');
   }
-  XLSX.writeFile(wb,`greyhound_sales_${from}_${to}.xlsx`);
+
+  // ── เพิ่ม sheet สรุปภาพรวม ────────────────────────────
+  const summaryRows=[
+    ['Greyhound Original — Sales Report'],
+    [''],
+    ['ช่วงวันที่',`${from} ถึง ${to}`],
+    ['สาขาที่เลือก', selectedStores?[...selectedStores].join(', '):'ทุกสาขา'],
+    ['สร้างเมื่อ', new Date().toLocaleString('th-TH')],
+    [''],
+    ['รายการ','ยอด'],
+    ['ยอดขาย Net Amount', sales?sales.net:0],
+    ['ยอดขาย Gross Amount', sales?sales.gross:0],
+    ['จำนวนออเดอร์', sales?sales.orders:0],
+    ['จำนวนชิ้น', sales?sales.items:0],
+    ['เฉลี่ย/ออเดอร์', sales?sales.avgPerOrder:0],
+  ];
+  const wsSummary=XLSX.utils.aoa_to_sheet(summaryRows);
+  wsSummary['!cols']=[{wch:22},{wch:30}];
+  wsSummary['A1'].s={font:{bold:true,sz:14,color:{rgb:'2563EB'}}};
+  wsSummary['A7'].s={font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1E40AF'}}};
+  wsSummary['B7'].s={font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1E40AF'}}};
+  wsSummary['!merges']=[{s:{r:0,c:0},e:{r:0,c:1}}];
+  XLSX.utils.book_append_sheet(wb,wsSummary,'ภาพรวม');
+
+  // move ภาพรวม ไปเป็น sheet แรก
+  const sheetOrder=['ภาพรวม','สรุปรายวัน','ยอดขายตามสาขา','รายละเอียดรายการ'];
+  wb.SheetNames=sheetOrder.filter(s=>wb.SheetNames.includes(s));
+
+  const storeLabel=selectedStores?[...selectedStores].join('_'):'ALL';
+  XLSX.writeFile(wb,`greyhound_sales_${storeLabel}_${from}_${to}.xlsx`,{cellStyles:true});
   closeExport();
 }
 
